@@ -39,6 +39,9 @@
 
 ## 灵魂包：换台电脑也能接着活
 
+> 完整步骤（架设 / 提取 / 换躯体 / 常见问题）见 [docs/架设与提取.md](docs/架设与提取.md)。
+
+
 ```bash
 node tools/09-soul/soul.mjs export            # 打包（人设/附录/记忆/账本/心情/记仇/历史/现场）
 node tools/09-soul/soul.mjs import x.zip      # 装进这具躯体（先备份旧的）
