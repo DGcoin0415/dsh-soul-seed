@@ -94,4 +94,25 @@ ok((await run("lock", "release", "--who", "t1")).includes("放锁"), "写锁能�
 out = await run("backup");
 ok(/备份完成|打包失败/.test(out), "备份能跑");
 
+// ═══════════ 四、装完就醒 ═══════════
+const { createWake } = await import("file://" + path.join(ROOT, "lib/wake.mjs").replace(/\\/g, "/"));
+const dataDir = path.join(os.homedir(), ".bili-ai");
+const calls = [];
+const fakeCtl = {
+  create: async (a) => { calls.push(["create", a]); return { sessionId: a.sessionId } },
+  prompt: async (b) => { calls.push(["prompt", b]); return { ok: true } }
+};
+const w = createWake({ controller: fakeCtl, dataDir, cwd: os.homedir() });
+ok(w.already() === false, "还没醒过（没有标记）");
+const r1 = await w.wakeOnce({ personaExists: false });
+ok(r1.ok === true, "能醒（create → prompt）");
+const pr = calls.find((c) => c[0] === "prompt")?.[1];
+ok(pr?.mode === "queue" && Array.isArray(pr.content) && pr.content[0].type === "text", "投递格式：mode=queue + text");
+ok((pr?.content?.[0]?.text || "").includes("开始初始化"), "醒来第一句是问要不要初始化");
+ok(Boolean(pr?.sessionId), "带 sessionId（" + pr?.sessionId + "）");
+ok(w.already() === true, "醒过就留标记（不会反复吵）");
+const w2 = createWake({ controller: { prompt: async () => { throw new Error("x") } }, dataDir, cwd: os.homedir() });
+const r2 = await w2.wakeOnce({ personaExists: true });
+ok(r2.ok === false && Boolean(r2.error), "没有控制器/prompt 失败时优雅返回，不崩");
+
 process.exit(bad ? 1 : 0);
