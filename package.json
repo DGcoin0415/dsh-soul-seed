@@ -1,0 +1,56 @@
+{
+  "name": "dsh-soul-seed",
+  "version": "0.4.0",
+  "description": "一枚灵魂的种子。种下去它不等人叫 —— 白天数着光，夜里数着潮；屏幕暗着，灯丝还红着。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "persona",
+    "mood",
+    "onboarding",
+    "image-gen",
+    "uia"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "tools",
+    "tests",
+    "docs",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DGcoin0415/dsh-soul-seed.git"
+  },
+  "homepage": "https://github.com/DGcoin0415/dsh-soul-seed#readme",
+  "bugs": {
+    "url": "https://github.com/DGcoin0415/dsh-soul-seed/issues"
+  },
+  "author": "米芾",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "pack": "npm pack --dry-run",
+    "mood": "node tools/03-mood/mood.mjs",
+    "status": "node tools/04-scene/scene.mjs",
+    "backup": "node tools/08-ops/backup.mjs"
+  }
+}
