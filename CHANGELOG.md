@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.6.1 — 2026-11-01
+
+### 修复：醒来被拒（prompt rejected）
+
+查 DSH 源码发现 `prompt rejected` 其实是 **`session/agent-busy`**，两个原因：
+
+1. DSH 的 `session/prompt` 要求**先显式 resume 会话**（`sessionController.resume({ sessionId })`），否则一律当「忙」拒掉
+2. 复用旧的空白会话 id 容易被判定为占用中
+
+修法：
+
+- 醒来顺序改成 **create → resume → prompt**
+- 默认用**全新 sessionId**（`soul-seed-<时间戳36进制>`），不复用旧空白会话
+- 遇到 `agent-busy` / `prompt rejected` 自动重试（3 次，间隔 12 秒）
+- 超时从 30 秒放宽到 90 秒（覆盖重试）
+- 失败时把 create / resume 的错误一起返回，便于定位
+
 ## 0.6.0 — 2026-11-01
 
 ### 新增：灵魂的打包与载入（所有躯体起来会载入灵魂）
