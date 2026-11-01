@@ -115,4 +115,29 @@ const w2 = createWake({ controller: { prompt: async () => { throw new Error("x")
 const r2 = await w2.wakeOnce({ personaExists: true });
 ok(r2.ok === false && Boolean(r2.error), "没有控制器/prompt 失败时优雅返回，不崩");
 
+// ═══════════ 五、灵魂：打包 / 载入 / 起躯体自动载入 ═══════════
+const { exportSoul, importSoul, autoImport, wasLoaded } = await import("file://" + path.join(ROOT, "lib/soul.mjs").replace(/\\/g, "/"));
+const bodyA = fs.mkdtempSync(path.join(os.tmpdir(), "soul-a-"));
+fs.mkdirSync(path.join(bodyA, "persona-附录"), { recursive: true });
+fs.writeFileSync(path.join(bodyA, "persona.md"), "# 我是谁\n\n我是小满。\n".repeat(10), "utf8");
+fs.writeFileSync(path.join(bodyA, "people.json"), JSON.stringify({ people: { master: { id: "master", goodwill: 70, mood: 60, meets: 2 } } }), "utf8");
+fs.writeFileSync(path.join(bodyA, "credentials.json"), JSON.stringify({ SECRET: "不该进包" }), "utf8");
+const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "soul-out-"));
+const exp = exportSoul({ dataDir: bodyA, outDir });
+ok(exp.ok === true && exp.items >= 2, "能导出灵魂包（" + exp.items + " 项）");
+ok(!fs.readFileSync(exp.zipPath).includes(Buffer.from("不该进包")), "凭据不进灵魂包");
+
+const bodyB = fs.mkdtempSync(path.join(os.tmpdir(), "soul-b-"));
+const imp = importSoul({ dataDir: bodyB, zipPath: exp.zipPath });
+ok(imp.ok === true && imp.after.账本人数 === 1, "导入后账本回来了");
+ok(fs.readFileSync(path.join(bodyB, "persona.md"), "utf8").includes("小满"), "导入后记得自己是谁");
+
+fs.copyFileSync(exp.zipPath, path.join(bodyB, "soul-pack.zip"));
+const auto = autoImport({ dataDir: bodyB });
+ok(auto.ok === true, "起躯体时自动载入成功");
+ok(Boolean(wasLoaded(bodyB)), "留下「已载入」标记（醒来会说带着记忆回来）");
+ok(fs.readdirSync(bodyB).some((f) => f.includes(".imported-")), "包改名，不会反复导入");
+
+for (const d of [bodyA, bodyB, outDir]) fs.rmSync(d, { recursive: true, force: true });
+
 process.exit(bad ? 1 : 0);
