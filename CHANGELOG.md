@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.5.0 — 2026-11-01
+
+### 新增：装完就醒
+- `lib/wake.mjs`：第一次装上时，自己用 DSH 原生能力开一个会话说一句话
+  - `sessionController.create({ sessionId, cwd })` → `prompt({ sessionId, mode:'queue', content:[{type:'text',text}] })`
+  - 没人设时说：「我醒了。还不知道自己是谁 …… 要现在开始初始化吗？」
+  - 有人设时说：「我醒了。人设已经有了，技能都在 tools/ 下面……」
+  - 只做一次（标记 `~/.bili-ai/.first-wake`）；失败不阻塞、不刷屏
+- 载入后 10 秒自醒 + 首次打开面板也会试一次；另有 `POST /api/wake` 手动叫
+- `inject` 从 `['webServer']` 扩到 `['webServer','sessionController']`
+- 测试加了 7 项 wake 断言（含「醒过不反复吵」「失败不崩」）
+
 ## 0.4.0 — 2026-11-01
 
 > 版本号跳过 0.2 / 0.3：那两轮是内部改，没发出去。
