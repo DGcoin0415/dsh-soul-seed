@@ -37,6 +37,20 @@
 
 **换个人部署，重新答一遍就行** —— 骨架通用，人各不同。
 
+## 灵魂包：换台电脑也能接着活
+
+```bash
+node tools/09-soul/soul.mjs export            # 打包（人设/附录/记忆/账本/心情/记仇/历史/现场）
+node tools/09-soul/soul.mjs import x.zip      # 装进这具躯体（先备份旧的）
+node tools/09-soul/soul.mjs status            # 这具躯体里有什么
+```
+
+**起躯体自动载入**：把灵魂包改名成 `soul-pack.zip` 丢进 `~/.bili-ai/`，下次启动会自己载入，然后醒来第一句是：
+
+> 我带着记忆回来了。灵魂已载入：人设 2006 字 · 记忆 12 条 · 账本 3 人 ……
+
+**永不进包**：`credentials.json`、`image-keys.json`、cookies —— 换机器要重填 key。
+
 ## 三块能力
 
 | 能力 | 干什么 | 数据 |
