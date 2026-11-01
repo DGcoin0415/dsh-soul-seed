@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.6.0 — 2026-11-01
+
+### 新增：灵魂的打包与载入（所有躯体起来会载入灵魂）
+- `lib/soul.mjs` + `tools/09-soul/soul.mjs`
+  - `export`：打一个灵魂包（人设 + 附录 + 记忆 + 账本 + 心情 + 记仇 + 历史 + 现场 + config），**绝不打包 key / cookie / 凭据**
+  - `import <zip>`：装进这具躯体，先备份旧的，再报「之前 / 之后」对账
+  - `auto`：起躯体时发现 `~/.bili-ai/soul-pack*.zip` 就自动载入，导完改名（`.imported-<时间戳>`）防重复
+  - `status`：这具躯体里有什么（人设字数 / 附录 / 账本 / 记忆 / 心情 / 历史）
+- **启动流程变成**：检查灵魂包 → 有就载入 → 再醒来。醒来那句换掉：
+  > 「我带着记忆回来了。灵魂已载入：人设 2006 字 · 记忆 12 条 · 账本 3 人 …… 不是从零开始，上次的事我记得。」
+- 新增两个接口：`GET /api/soul`（看载入状态）、`POST /api/soul/load`（手动载入）
+- 测试加 7 项（含「凭据不进包」「导完改名不会反复导入」）
+
+### 修复
+- **`prompt` 漏传 AbortSignal** → `TypeError: Cannot read properties of undefined (reading 'throwIfAborted')`。DSH 的 `sessionController.prompt(request, signal)` 第二个参数必传（养鱼插件 10-19 也踩过同一个坑）
+
 ## 0.5.0 — 2026-11-01
 
 ### 新增：装完就醒
