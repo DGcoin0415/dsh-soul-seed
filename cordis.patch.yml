@@ -1,0 +1,15 @@
+# ============================================================================
+# dsh-soul-seed —— DSH bundle patch
+# ============================================================================
+# 装法（本地源码 link）：
+#   dsh plugin --profile desktop add "link:C:\\Users\\<你>\\.dsh\\plugins\\dsh-soul-seed"
+# 或发布后：
+#   dsh plugin --profile desktop add dsh-soul-seed
+#
+# ⚠️ `name:` 必须与安装后的包名完全一致，否则表现为「装上了但面板 404」。
+# 装好后面板在：http://127.0.0.1:<DSH 端口>/dsh-mifu/
+# ============================================================================
+
+- insert:
+    - id: dsh-soul-seed
+      name: dsh-soul-seed
