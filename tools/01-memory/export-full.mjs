@@ -2,10 +2,10 @@ import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
 
-// 总体记忆本：把会话原文按天存到 shared/全量/YYYY-MM-DD.md
+// 全量：把会话原文按天存到 shared/全量/YYYY-MM-DD.md
 // 只追加缺的，不重写已有；原始对话不改一个字。
 const SESS_ROOT = 'C:/Users/Administrator/.dsh/sessions/--C-Users-Administrator-.dsh-im--'
-const OUT_DIR = 'C:/Users/Administrator/.dsh/im/shared/总体记忆本'
+const OUT_DIR = 'C:/Users/Administrator/.dsh/im/shared/全量'
 
 function newestSession() {
   const dirs = fs.readdirSync(SESS_ROOT, { withFileTypes: true })
