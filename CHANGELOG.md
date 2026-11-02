@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.6.6 — 2026-11-02
+
+- 插件入口只硬依赖 webServer：sessionController 若不存在，面板照常出，「醒来」自动跳过（不再整块静默不加载）
+- README 不再承诺"装完会自己在对话里说话"，改为"落笔记 + 面板显示"，并写清限制原因
+- README 新增「卸载与回滚」：写哪些路径、怎么删干净、怎么只卸插件留记忆
+- 新增 .gitignore 与 GitHub Actions（跑 tests/run.mjs）
+- package.json：补 dsh.category / displayName，keywords 补 memory/soul，engines 提到 >=20
+- cordis.patch.yml 注释里的面板路径改正（老名字 /dsh-mifu/ 残留）
 ## 0.6.5 — 2026-11-01
 
 ### 修复
