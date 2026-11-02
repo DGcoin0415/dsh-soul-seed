@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.7.1 — 2026-11-02
+
+- 新增 `tools/01-memory/export-full.mjs`：会话原文按天存到 `shared/全量/`，只追加不重写
+- 新增 `tools/01-memory/memory-note.mjs`：日档三行（触点 / 变 / 回）
+- 新增 `tools/01-memory/memory-hit.mjs`：命中记账，哪条记忆被用到就记一笔
+- 新增 `tools/07-sync/rule-change.mjs`：改规矩只覆盖提到的那一段，旧段落自动存进 `历史/规矩变更.md`
+- 设计取向：新规矩只描述旧规矩的一部分时，只替换那一段，其余不动
+
 ## 0.7.0 — 2026-11-02
 
 - 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.bili-ai/语音输入.md`
