@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.6.7 — 2026-11-02
+
+- 新增「非首次部署」自动判断：机器上已有人设 / 记忆 / 账本 / 灵魂目录时，跳过初始化十问，走「学本地的」
+- 新增 `lib/adopt.mjs`：只读检测 + 汇总 + 写 `我学会了.md`，不覆盖任何已有文件
+- 新增接口 `POST /dsh-soul-seed/api/adopt`，面板加一张「这台机器上已经有一只鱼」卡
+- 新增环境变量 `SOUL_SEED_MODE=learn|fresh` 强制切换模式
+- `/api/status` 返回里加 `deploy.mode` 和 `deploy.existing`
+
 ## 0.6.6 — 2026-11-02
 
 - 插件入口只硬依赖 webServer：sessionController 若不存在，面板照常出，「醒来」自动跳过（不再整块静默不加载）
