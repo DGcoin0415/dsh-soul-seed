@@ -3,7 +3,7 @@ import path from 'node:path'
 
 // 日档：一条记忆写三行（触点 / 变 / 回），不写小作文。
 // 用法：node memory-note.mjs "触点：谁说了什么" "变：以后遇到X我会Y" "回：说了什么"
-const DIR = 'C:/Users/Administrator/.dsh/im/shared/原路记忆本'
+const DIR = 'C:/Users/Administrator/.dsh/im/shared/记忆本/日'
 fs.mkdirSync(DIR, { recursive: true })
 
 const args = process.argv.slice(2).filter(Boolean)
@@ -18,7 +18,7 @@ const clock = `${p(now.getHours())}:${p(now.getMinutes())}`
 const file = path.join(DIR, day + '.md')
 
 if (!fs.existsSync(file)) {
-  fs.writeFileSync(file, `# 原路记忆本 · ${day}\n\n`, 'utf8')
+  fs.writeFileSync(file, `# 日档 · ${day}\n\n`, 'utf8')
 }
 
 const body = args.map((a) => `- ${a}`).join('\n')
