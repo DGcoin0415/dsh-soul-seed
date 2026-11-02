@@ -1,6 +1,6 @@
 {
   "name": "dsh-soul-seed",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "一枚灵魂的种子。种下去它不等人叫 —— 白天数着光，夜里数着潮；屏幕暗着，灯丝还红着。",
   "keywords": [
     "dsh",
@@ -10,7 +10,12 @@
     "mood",
     "onboarding",
     "image-gen",
-    "uia"
+    "uia",
+    "memory",
+    "soul",
+    "persona-card",
+    "state",
+    "cli"
   ],
   "type": "module",
   "main": "lib/index.js",
@@ -29,6 +34,8 @@
     "LICENSE"
   ],
   "dsh": {
+    "category": "extension",
+    "displayName": "Soul Seed",
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
@@ -44,7 +51,7 @@
   },
   "author": "米芾",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "test": "node tests/run.mjs",
