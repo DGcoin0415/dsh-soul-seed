@@ -19,18 +19,6 @@
 
 剩下的位置一直留白，让它自己长。
 
-## 装之前先自检（v0.6.8 起）
-
-装完插件对着面板 404 最常见，先跑一遍自检，它会告诉你缺什么：
-
-```bash
-node tools/00-install/check.mjs
-```
-
-查这些：Node 版本够不够、`~/.dsh` 在不在、profile 是哪个、插件装没装、机器上已有的人设/记忆/账本（决定走首次十问还是「学本地的」）、`cordis.patch.yml` 里的包名跟插件对不对得上。
-
-有拦路的会直接打出该敲的命令，全部通过才提示「可以种」。加 `--json` 给脚本读。
-
 ## 不是第一次部署？（v0.6.7 起自动判断）
 
 插件装完会先看一眼这台机器：`~/.bili-ai/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
@@ -62,6 +50,34 @@ node tools/00-install/check.mjs
 5. 生成人设 → 你自己看一遍 → 点「写入」才落进 `~/.bili-ai/persona.md`（旧文件自动备份）
 
 **换个人部署，重新答一遍就行** —— 骨架通用，人各不同。
+
+## 语音：让它说、也听你说（0.7.0 新增）
+
+自带一个 `tools/10-voice/voice.py`，两条路：
+
+**说**（耳机出声）
+
+```bash
+python tools/10-voice/voice.py --say "睡前提醒你一句"
+```
+
+默认用微软 edge-tts 的 `zh-CN-XiaoyiNeural`（在线合成，不要 key，声音偏年轻）。想换成别的音色改文件顶部 `VOICE_NAME`；想完全离线用 `--backend piper`（需要自己下 Piper 中文音色）。
+
+**听**（话筒收音 → 文字）
+
+```bash
+python tools/10-voice/voice.py --listen
+```
+
+本地 whisper（small，CPU 跑得动）识别中文，每句写进 `~/.bili-ai/语音输入.md`，说完回一句「嗯，记下了」。
+
+依赖（自己装，插件不代装）：
+
+```bash
+pip install edge-tts faster-whisper sounddevice numpy
+```
+
+模型和缓存放 `~/.bili-ai/voice/`。国内下 HuggingFace 不通的话设 `HF_ENDPOINT=https://hf-mirror.com`，脚本里已经默认设了。
 
 ## 灵魂包：换台电脑也能接着活
 
