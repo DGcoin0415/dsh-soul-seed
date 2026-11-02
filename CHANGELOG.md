@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## 0.6.8 — 2026-11-02
+## 0.7.0 — 2026-11-02
 
-- 新增 `tools/00-install/check.mjs` 装机自检：查 Node 版本、DSH 目录、profile、插件是否已装、已有资产够不够、补丁包名对不对
-- 有拦路的直接标出该敲的命令，没拦路才提示「可以种」，不用对着面板 404 猜
-- 支持 `--json`，方便别的脚本读
+- 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.bili-ai/语音输入.md`
+- 新增 `npm run voice` 快捷方式
+- 语音依赖不代装：README 里写了 pip 一行装齐；HF 走 hf-mirror 镜像
+- 边界：语音是**可选**能力，不装依赖不影响插件本体
 
 ## 0.6.7 — 2026-11-02
 
