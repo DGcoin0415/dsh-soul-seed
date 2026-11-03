@@ -1,0 +1,4 @@
+# dsh-tool-gate bundle patch
+- insert:
+    - id: tool-gate
+      name: 'dsh-tool-gate'

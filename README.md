@@ -67,6 +67,31 @@ node tools/13-model-check/model-check.mjs --base https://xxx/v1 --key sk-xxx --m
 
 直连通过不等于插件里通过（插件会加会话路由、缓存绑定等请求头），所以还要切过去发一句话，看字是正常显示还是折进「思考」块里。
 
+## 上下文按 12 小时分页（0.11.0 新增）
+
+会话攒大了，回一个字也要好几秒 —— 因为每轮都要把全部历史过一遍。DSH 不给插件改历史的接口，所以改成**分页读**：
+
+```bash
+node tools/14-pages/page-archive.mjs     # 把历史按 12 小时切页，增量
+node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
+```
+
+产出在 `shared/全量/页/`：`索引.md` 是目录，每页带一句「那会儿在说啥」；`shared/接续.md` 是最近 12 小时。
+
+读法写进 `AGENTS.md`：先读接续 → 不够就看页索引，从最新一页**往前一页一页**翻 → 翻到能对上就停 → 都没有才去整天全量或向量回忆。
+
+每轮只带最近这些，上下文从「几 MB」降到「一页」，比任何 prompt 压缩都实在。
+
+## 工具分组、按需开放（0.11.0 新增，可选插件）
+
+工具定义的「说明书」每轮都要发一遍，54 个工具就是 1.66 万 token。`tools/15-tool-gate` 是个独立小插件：
+
+- 平时只露常驻工具，其余按组藏起来，连参数定义都不发
+- 要用时 `tool_gate({"action":"open","group":"生图"})` 开一组，本会话有效
+- 顺手把每个参数说明压到 22 字，`pwsh` 这类保留全文
+
+实测 16.6k → 3.4k token。装在 `~/.dsh/plugins/dsh-tool-gate`，配置在 `~/.dsh/im/tool-groups.json`，细节看那个目录的 README。
+
 ## 记忆的四个地方（0.9.0 起统一叫法）
 
 名字都按树来，别再造新词：
@@ -211,6 +236,8 @@ node tools/04-scene/scene.mjs show                # 看现场 + 心情
 node tools/02-people/people.mjs show               # 看账本
 node tools/02-people/people.mjs mood master --delta 6 --kind praise --why "他夸我了"
 node tools/06-image/gen-image.mjs --prompt "..." --provider zhipu --model cogview-4 --size 1024x1280
+node tools/14-pages/page-archive.mjs                 # 历史按 12 小时切页（增量）
+node tools/14-pages/compact-session.mjs              # 刷新最近 12 小时接续页
 ```
 
 ## 心情怎么用
