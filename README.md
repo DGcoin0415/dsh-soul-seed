@@ -51,6 +51,29 @@
 
 **换个人部署，重新答一遍就行** —— 骨架通用，人各不同。
 
+## 模糊回忆：精确的放文本，模糊的放向量（0.8.0 新增）
+
+记忆分两条路：
+
+- **精确的**（人设、规矩、账本、心情）留在 `~/.bili-ai/` 的文本树里，翻文件就能确认。
+- **模糊的**（"上次聊的那个游戏好像叫…"）进向量索引，按语义找。
+
+用法：
+
+```bash
+mkdir -p ~/.bili-ai/long          # 长对话原文放这，一个会话一个 .md
+node tools/11-rag/rag.mjs index    # 切块 + 向量化（走百炼 text-embedding-v3）
+node tools/11-rag/rag.mjs query "任务栏卡住那次怎么解决的"
+node tools/11-rag/rag.mjs stat     # 索引里有多少块
+```
+
+要点：
+
+- 向量模型用阿里百炼的 `text-embedding-v3`，key 复用 `~/.bili-ai/image-keys.json` 里的 `dashscope`，不用另外申请。
+- 索引是本地一个 JSON（`~/.bili-ai/vector/index.json`），不联网也能读，只是查询时要调一次 embedding。
+- 已入库的块按文件名+序号去重，重跑不会重复花钱。
+- 为什么不全用向量：精确的事实靠检索容易召回错片段，翻文件更可信；模糊的联想靠翻文件翻不到，才需要向量。
+
 ## 语音：让它说、也听你说（0.7.0 新增）
 
 自带一个 `tools/10-voice/voice.py`，两条路：
