@@ -10,22 +10,22 @@ const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
 const OUT = path.join(HOME, 'shared', '接续.md')
 const HOURS = Number(process.argv[2] || 12)
+const cutoff = Date.now() - HOURS * 3600 * 1000
 
-function newest() {
-  // 只找这个工作区的会话：~/.dsh/sessions/--C-...-.dsh-im--/session-xxx/
+// 同一时间可能开了好几个会话（两个窗口、换过会话），都算进来，不然会漏
+function recentSessions() {
   const ws = '--' + HOME.replace(/[:\\/]+/g, '-') + '--'
   const roots = [path.join(SESSIONS, ws), SESSIONS].filter((d) => fs.existsSync(d))
-  let best = null
+  const found = []
   for (const root of roots) {
     for (const d of fs.readdirSync(root)) {
       const f = path.join(root, d, 'session.v4.jsonl.zstd')
-      if (fs.existsSync(f)) {
-        const m = fs.statSync(f).mtimeMs
-        if (!best || m > best.m) best = { m, f, dir: d }
-      }
+      if (!fs.existsSync(f)) continue
+      const m = fs.statSync(f).mtimeMs
+      if (m >= cutoff - 3600 * 1000) found.push({ m, f, dir: d })
     }
   }
-  return best
+  return found.sort((a, b) => b.m - a.m).slice(0, 6)
 }
 
 function decode(file) {
@@ -54,33 +54,69 @@ function textOf(content) {
     .join('')
 }
 
-const s = newest()
-if (!s) {
+// 系统塞进来的那些，不是人说的话
+const NOISE = [/^Current runtime context/, /^Time sampled while preparing/, /^\[model changed/, /^<dsh_im_files>/, /^<system-reminder>/, /^<available_skills>/]
+const noisy = (t) => t.startsWith('<') || NOISE.some((re) => re.test(t))
+
+const found = recentSessions()
+if (!found.length) {
   console.error('没找到会话文件：' + SESSIONS)
   process.exit(1)
 }
 
-const cutoff = Date.now() - HOURS * 3600 * 1000
 const rows = []
-for (const line of decode(s.f).split('\n')) {
-  if (!line.trim()) continue
-  let d
+const seen = new Set()
+for (const s of found) {
+  let raw
   try {
-    d = JSON.parse(line)
+    raw = decode(s.f)
   } catch {
     continue
   }
-  if (!d.time || d.time < cutoff) continue
-  if (d.type === 'user/message') {
-    const t = textOf(d.data?.content).trim()
-    if (t && !t.startsWith('<')) rows.push({ ms: d.time, role: 'master', text: t })
-  } else if (d.type === 'assistant/message') {
-    const t = textOf(d.data?.message?.content).trim()
-    if (t) rows.push({ ms: d.time, role: '米萨', text: t })
+  for (const line of raw.split('\n')) {
+    if (!line.trim()) continue
+    let d
+    try {
+      d = JSON.parse(line)
+    } catch {
+      continue
+    }
+    if (!d.time || d.time < cutoff) continue
+    let role = null
+    let text = ''
+    if (d.type === 'user/message') {
+      text = textOf(d.data?.content).trim()
+      role = 'master'
+    } else if (d.type === 'assistant/message') {
+      text = textOf(d.data?.message?.content).trim()
+      role = '米萨'
+    }
+    if (!role || !text || noisy(text)) continue
+    text = text.replace(/\n+/g, ' ').trim()
+    // 图片附件清单这类尾巴不要，正文留下
+    const cut = text.indexOf('<dsh_im_files>')
+    if (cut > 0) text = text.slice(0, cut).trim()
+    const key = `${d.time}|${role}|${text.slice(0, 80)}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    rows.push({ ms: d.time, role, text })
   }
 }
 
 rows.sort((a, b) => a.ms - b.ms)
+
+// 12 小时也可能聊出好几百条，接续页按字数封顶（约 1.2 万字），更早的去页里翻
+const CAP_CHARS = 8000
+let kept = 0
+let used = 0
+for (let i = rows.length - 1; i >= 0; i--) {
+  const len = rows[i].text.length + 20
+  if (used + len > CAP_CHARS) break
+  used += len
+  kept++
+}
+const dropped = rows.length - kept
+if (dropped > 0) rows.splice(0, dropped)
 
 const p = (n) => String(n).padStart(2, '0')
 const fmt = (ms) => {
@@ -91,11 +127,11 @@ const fmt = (ms) => {
 const head = [
   `# 接续 · 最近 ${HOURS} 小时`,
   '',
-  `> 生成于 ${fmt(Date.now())}，来源会话 ${s.dir}`,
-  `> 共 ${rows.length} 条。更早的事按 12 小时分页存在 \`shared/全量/页/\`，先看那里的 \`索引.md\`，从最新一页往前一页一页翻；翻不到再用 \`soul action=rag-recall\`。`,
+  `> 生成于 ${fmt(Date.now())}，来源 ${found.length} 个会话`,
+  `> 共 ${rows.length} 条${dropped ? `（更早的 ${dropped} 条留在分页里）` : ''}。更早的事按 12 小时分页存在 \`shared/全量/页/\`，先看那里的 \`索引.md\`，从最新一页往前一页一页翻；翻不到再用 \`soul action=rag-recall\`。`,
   '',
 ]
 const body = rows.map((r) => `- [${fmt(r.ms)}] ${r.role}：${r.text.replace(/\n+/g, ' ').slice(0, 400)}`)
 fs.writeFileSync(OUT, head.concat(body).join('\n') + '\n', 'utf8')
 
-console.log(`接续页写好了：${rows.length} 条 → ${OUT}`)
+console.log(`接续页写好了：${rows.length} 条（${found.length} 个会话）→ ${OUT}`)

@@ -78,15 +78,19 @@ function sessions() {
   return out
 }
 
-const NOISE = ['Current runtime context.', 'Time sampled while preparing turn', '<dsh_im_files>', '<system-reminder>', '<available_skills>']
+const NOISE = ['Current runtime context.', 'Time sampled while preparing turn', '[model changed', '<dsh_im_files>', '<system-reminder>', '<available_skills>']
 
 const state = fs.existsSync(STATE) ? JSON.parse(fs.readFileSync(STATE, 'utf8').replace(/^\uFEFF/, '')) : { seen: {}, pages: {} }
 const seen = state.seen
 const pages = state.pages
+const files = state.files || (state.files = {})
 let added = 0
 let scanned = 0
 
 for (const file of sessions()) {
+  // 会话文件没动过就不用再解一遍，省时间
+  const mtime = fs.statSync(file).mtimeMs
+  if (files[file] === mtime) continue
   let raw
   try {
     raw = decode(file)
@@ -94,6 +98,7 @@ for (const file of sessions()) {
     continue
   }
   scanned++
+  files[file] = mtime
   for (const line of raw.split('\n')) {
     if (!line.trim()) continue
     let d
@@ -138,7 +143,7 @@ for (const file of sessions()) {
   }
 }
 
-fs.writeFileSync(STATE, JSON.stringify({ seen, pages }, null, 0), 'utf8')
+fs.writeFileSync(STATE, JSON.stringify({ seen, pages, files }, null, 0), 'utf8')
 
 const rows = Object.entries(pages).sort((a, b) => b[1].last - a[1].last)
 const lines = [
