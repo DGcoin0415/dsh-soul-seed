@@ -1,17 +1,12 @@
 # CHANGELOG
 
-## 0.7.2 — 2026-11-02
+## 0.8.0 — 2026-11-03
 
-- 目录命名保持原样：`全量/`（原文按天）、`记忆本/日/`（三行日档）、`记忆本/命中.jsonl`（命中记账）
-- 三个脚本内部路径与之一致，行为不变
-
-## 0.7.1 — 2026-11-02
-
-- 新增 `tools/01-memory/export-full.mjs`：会话原文按天存到 `shared/全量/`，只追加不重写
-- 新增 `tools/01-memory/memory-note.mjs`：日档三行（触点 / 变 / 回）
-- 新增 `tools/01-memory/memory-hit.mjs`：命中记账，哪条记忆被用到就记一笔
-- 新增 `tools/07-sync/rule-change.mjs`：改规矩只覆盖提到的那一段，旧段落自动存进 `历史/规矩变更.md`
-- 设计取向：新规矩只描述旧规矩的一部分时，只替换那一段，其余不动
+- 新增「模糊回忆」：`lib/rag.mjs` + `tools/11-rag/rag.mjs`（index / query / stat）
+- 长对话原文切块后走百炼 `text-embedding-v3` 建本地向量索引，语义检索旧对话
+- 与文本树分工：精确事实翻文件，模糊联想走向量；索引本地 JSON，不依赖外部向量库
+- 复用 `~/.bili-ai/image-keys.json` 的 dashscope key，不额外申请
+- 已知限制：查询时需联网调一次 embedding；切块 600 字，长句可能被切断
 
 ## 0.7.0 — 2026-11-02
 
