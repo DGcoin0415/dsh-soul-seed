@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.0 — 2026-11-03
+
+- 新增「翻叶」：`lib/turnlog.mjs`，读写记忆时自动记一笔 `leaves-log.md`，回答"这轮用了什么"时看得见
+- 新增「修枝」：`lib/tidy.mjs`，每天 4:10 截断翻叶（留 200 行）、把 45 天没动的落叶归档到 `旧/`、增量重建索引
+- 新增 CLI `tools/12-tree/tree.mjs`（leaves / tidy）
+- 命名统一成树的说法：根 / 枝 / 落叶 / 翻叶 / 修枝，README 加了对照表
+- 目录 `long/` 在文档里改称「落叶」，代码保留兼容
+
 ## 0.8.0 — 2026-11-03
 
 - 新增「模糊回忆」：`lib/rag.mjs` + `tools/11-rag/rag.mjs`（index / query / stat）
