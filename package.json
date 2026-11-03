@@ -1,6 +1,6 @@
 {
   "name": "dsh-soul-seed",
-  "version": "0.11.4",
+  "version": "0.11.5",
   "description": "一枚灵魂的种子。种下去它不等人叫 —— 白天数着光，夜里数着潮；屏幕暗着，灯丝还红着。",
   "keywords": [
     "dsh",
@@ -57,6 +57,7 @@
     "test": "node tests/run.mjs",
     "pack": "npm pack --dry-run",
     "mood": "node tools/03-mood/mood.mjs",
+    "mood:sync": "node tools/17-mood/sync-mood.mjs",
     "status": "node tools/04-scene/scene.mjs",
     "backup": "node tools/08-ops/backup.mjs",
     "soul": "node tools/09-soul/soul.mjs",

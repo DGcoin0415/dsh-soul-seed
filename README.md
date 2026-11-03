@@ -96,6 +96,10 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 
 实测 16.6k → 3.4k token。装在 `~/.dsh/plugins/dsh-tool-gate`，配置在 `~/.dsh/im/tool-groups.json`，细节看那个目录的 README。
 
+## 心情与日志的日常维护（0.11.5）
+
+`node tools/17-mood/sync-mood.mjs` 跑一遍心情，写回 `shared/mood.md` 和人设卡；同一个区块覆盖，心情没变就跳过。修枝（每天 4:10）会顺手跑一次，也会把 `wake.log` 这类日志滚到只剩最后 2000 行。
+
 ## 名字叫醒：卡住不许一直重试（0.11.3）
 
 群里有人喊名字时，往已经打开的会话里投一句（`tools/16-name-wake/`）。以前投不进去会反复重试，日志刷屏、消息堵住；现在三条：最多试 3 次、标记超过 10 分钟作废、投不进就丢掉标记。
