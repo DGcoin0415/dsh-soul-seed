@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.10.0 — 2026-11-03
+
+- 新增 `tools/13-model-check/model-check.mjs`：接新模型前发一句真请求，判断「正文是空的」还是「字被塞进 reasoning」
+- README 加「接模型前先体检」一节，说明直连通过不等于插件里通过
+- 起因：接 OpenCode Go 时出现「接口通了但会话里没回话」，字全在思考块里
+
 ## 0.9.0 — 2026-11-03
 
 - 新增「翻叶」：`lib/turnlog.mjs`，读写记忆时自动记一笔 `leaves-log.md`，回答"这轮用了什么"时看得见
