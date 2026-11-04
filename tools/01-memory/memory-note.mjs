@@ -1,9 +1,10 @@
+import { sharedPath } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 
 // 日档：一条记忆写三行（触点 / 变 / 回），不写小作文。
 // 用法：node memory-note.mjs "触点：谁说了什么" "变：以后遇到X我会Y" "回：说了什么"
-const DIR = 'C:/Users/Administrator/.dsh/im/shared/记忆本/日'
+const DIR = sharedPath('shared', '记忆本', '日')
 fs.mkdirSync(DIR, { recursive: true })
 
 const args = process.argv.slice(2).filter(Boolean)
