@@ -1,17 +1,18 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // shared-lock.mjs —— 共享目录的写锁（两台机器/两个进程同时改同一份文件时用）
 //
 //   node shared-lock.mjs acquire [--ttl 300] [--who me]
 //   node shared-lock.mjs release
 //   node shared-lock.mjs status
 //
-// 锁文件：~/.bili-ai/shared/.lock.json
+// 锁文件：~/.dsh/soul-seed/shared/.lock.json
 // 过期：超过 ttl 秒视为陈旧锁，可被抢（防止崩了以后永远锁死）
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const DIR = path.join(os.homedir(), ".bili-ai", "shared");
+const DIR = path.join(soulHome(), "shared");
 const FILE = path.join(DIR, ".lock.json");
 const argv = process.argv.slice(2);
 const cmd = argv[0] ?? "status";
