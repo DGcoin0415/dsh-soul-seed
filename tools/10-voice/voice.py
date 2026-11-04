@@ -12,10 +12,24 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
-ROOT = Path(os.environ.get("SOUL_SEED_ROOT", Path.home() / ".bili-ai"))
-VOICE = Path(os.environ.get("SOUL_SEED_VOICE", Path.home() / ".bili-ai" / "voice"))
+def _soul_root():
+    """灵魂数据目录：DSH_SOUL_DIR > ~/.dsh/soul-seed > ~/.bili-ai（老位置，存在就继续用）"""
+    env = os.environ.get("DSH_SOUL_DIR") or os.environ.get("SOUL_SEED_ROOT")
+    if env:
+        return Path(env)
+    fresh = Path.home() / ".dsh" / "soul-seed"
+    legacy = Path.home() / ".bili-ai"
+    if fresh.exists():
+        return fresh
+    if legacy.exists():
+        return legacy
+    return fresh
+
+
+ROOT = _soul_root()
+VOICE = Path(os.environ.get("SOUL_SEED_VOICE", ROOT / "voice"))
 MODELS = VOICE / "models"
-OUT_LOG = Path(os.environ.get("SOUL_SEED_VOICE_LOG", Path.home() / ".bili-ai" / "语音输入.md"))
+OUT_LOG = Path(os.environ.get("SOUL_SEED_VOICE_LOG", ROOT / "语音输入.md"))
 PIPER_MODEL = VOICE / "zh_CN-huayan-medium.onnx"
 
 SR = 16000
