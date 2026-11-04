@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -7,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 // 分页的定时器：0 点 / 12 点各刷一次；开机发现错过了就立刻补跑。
 // 用法：node tools/14-pages/pages-schedule.mjs      （前台常驻，适合挂到自己的守护里）
 // 可选环境变量：SOUL_HOME（默认 ~/.dsh/im）
-const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
+const HOME = sharedHome()
 const STATE = path.join(HOME, '.pages-schedule.json')
 const SCRIPTS = [path.join(HOME, 'page-archive.mjs'), path.join(HOME, 'compact-session.mjs')]
 
