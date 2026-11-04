@@ -1,3 +1,4 @@
+import { sharedPath } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -6,8 +7,8 @@ import path from 'node:path'
 //   node rule-change.mjs <文件> <主题> "<新内容>" [--why "为什么改"]
 // 例：
 //   node rule-change.mjs 情绪与说话.md "冷场" "冷场超过两分钟就自己找句话。" --why "master 说太冷了"
-const RULES = 'C:/Users/Administrator/.dsh/im/shared/规矩'
-const HIST = 'C:/Users/Administrator/.dsh/im/shared/历史/规矩变更.md'
+const RULES = sharedPath('shared', '规矩')
+const HIST = sharedPath('shared', '历史', '规矩变更.md')
 
 const args = process.argv.slice(2)
 const whyIdx = args.indexOf('--why')
