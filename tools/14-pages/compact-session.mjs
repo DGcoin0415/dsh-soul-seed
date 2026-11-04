@@ -124,14 +124,21 @@ const fmt = (ms) => {
   return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
 }
 
+// 每条后面挂个「下一跳」：这条出自哪一页，想细看直接翻那页
+const pageOf = (ms) => {
+  const d = new Date(ms)
+  const day = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+  return `${day}-${d.getHours() < 12 ? 'AM' : 'PM'}`
+}
+
 const head = [
   `# 接续 · 最近 ${HOURS} 小时`,
   '',
   `> 生成于 ${fmt(Date.now())}，来源 ${found.length} 个会话`,
-  `> 共 ${rows.length} 条${dropped ? `（更早的 ${dropped} 条留在分页里）` : ''}。更早的事按 12 小时分页存在 \`shared/全量/页/\`，先看那里的 \`索引.md\`，从最新一页往前一页一页翻；翻不到再用 \`soul action=rag-recall\`。`,
+  `> 共 ${rows.length} 条${dropped ? `（更早的 ${dropped} 条留在分页里）` : ''}。括号里是出处页，想细看翻 ` + '`shared/全量/页/` 里对应那页。',
   '',
 ]
-const body = rows.map((r) => `- [${fmt(r.ms)}] ${r.role}：${r.text.replace(/\n+/g, ' ').slice(0, 400)}`)
+const body = rows.map((r) => `- [${fmt(r.ms)}] ${r.role}：${r.text.replace(/\n+/g, ' ').slice(0, 400)} 〔${pageOf(r.ms)}〕`)
 fs.writeFileSync(OUT, head.concat(body).join('\n') + '\n', 'utf8')
 
 console.log(`接续页写好了：${rows.length} 条（${found.length} 个会话）→ ${OUT}`)

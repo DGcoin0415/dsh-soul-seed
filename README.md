@@ -96,6 +96,12 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 
 实测 16.6k → 3.4k token。装在 `~/.dsh/plugins/dsh-tool-gate`，配置在 `~/.dsh/im/tool-groups.json`，细节看那个目录的 README。
 
+## 接话筛子与空转检查（0.11.6）
+
+**接话筛子**（`tools/18-guard/should-reply.mjs`）：群聊、私聊都先过一道程序筛——白名单照接，黑名单挡掉，安静时段闭嘴，同一人连发合并成一句，每个会话一天还有上限。退 2 就别开口，退 0 才交给模型判断内容。规则写在 `shared/接话.json`。
+
+**空转检查**（`tools/18-guard/stall-check.mjs`）：长任务边上盯一个文件或目录，连着两轮没改动就退出码 3，意思是「别试了，报卡点」。治的就是反复重试到把日志刷到几 MB 那种。
+
 ## 心情与日志的日常维护（0.11.5）
 
 `node tools/17-mood/sync-mood.mjs` 跑一遍心情，写回 `shared/mood.md` 和人设卡；同一个区块覆盖，心情没变就跳过。修枝（每天 4:10）会顺手跑一次，也会把 `wake.log` 这类日志滚到只剩最后 2000 行。

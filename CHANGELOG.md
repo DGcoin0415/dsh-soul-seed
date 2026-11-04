@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.11.6 — 2026-11-04
+
+- 新增 `tools/18-guard/should-reply.mjs`：接话前的程序层筛子，群聊私聊都管
+  - 白名单（master 永远接）、黑名单、安静时段、同一人连发合并、每会话每日上限
+  - 退出码 2 = 别开口，0 = 交给模型判断内容值不值得答
+  - 规则在 `shared/接话.json`，日志落 `shared/接话日志.jsonl`
+- 新增 `tools/18-guard/stall-check.mjs`：空转检查
+  - 盯一个文件或目录，连着两轮没有改动就退 3，判「别再试了」
+  - 治的是「反复重试直到把日志刷到几 MB」
+- `tools/14-pages/compact-session.mjs`：接续每行后面挂出处页（`〔2026-11-03-PM〕`），查旧事顺着跳过去，不用从最新页往回翻
+- 起因：借 Super-agent 的「Router/Worker 分工 + 事件两级过滤 + 看门狗查进展」，挑能落地的三条先做
+
 ## 0.11.5 — 2026-11-03
 
 - 新增 `tools/17-mood/sync-mood.mjs`：把心情结果写进 `shared/mood.md` 和那本人设卡，同一个区块覆盖、没变就跳过
