@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // soul.mjs —— 灵魂打包 / 载入（命令行）
 //
 //   node tools/09-soul/soul.mjs status            现在这具躯体里有什么
@@ -13,7 +14,7 @@ import os from "node:os";
 import path from "node:path";
 import { exportSoul, importSoul, autoImport, soulStats, wasLoaded, SOUL_ITEMS, NEVER_PACK } from "../../lib/soul.mjs";
 
-const dataDir = path.join(os.homedir(), ".bili-ai");
+const dataDir = soulHome();
 const argv = process.argv.slice(2);
 const cmd = argv[0] ?? "status";
 const pos = argv.slice(1).filter((a) => !a.startsWith("--"));
