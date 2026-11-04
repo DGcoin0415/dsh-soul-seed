@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { execFileSync } from 'node:child_process'
+import { soulHome } from '../../lib/home.mjs'
 
 const HOME = os.homedir()
 const DSH = path.join(HOME, '.dsh')
@@ -77,7 +78,7 @@ const marks = {
   人设: path.join(DSH, 'persona-cards'),
   记忆: path.join(DSH, 'persona-cards', 'memories'),
   灵魂目录: path.join(DSH, 'im', 'shared'),
-  账本: path.join(HOME, '.bili-ai', 'people.json'),
+  账本: path.join(soulHome(), 'people.json'),
 }
 const present = Object.entries(marks).filter(([, p]) => exists(p)).map(([k]) => k)
 if (present.length >= 2) add('ok', '已有资产', `${present.join('、')} → 会走「学本地的」，不覆盖`)
