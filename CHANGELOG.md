@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.12.4 — 2026-11-05
+
+### 跟姐姐那份对齐：env 契约 + 启动留痕
+
+- esolveNode() 返回的 env 改成**完整环境**（不再是要调用方自己 merge process.env），跟姐姐那版契约一致；	idy.mjs 五处直接传 env: nodeEnv\n- lib/index.js 在 pply() 开头写一行 soul-boot.log —— 想确认插件到底有没有被加载，看这个文件
+
+姐姐那次自查还指出：process.execPath 在 Electron 里是主程序，不能直接当 node 用（已在 0.12.3 修）。她那份 esolveNode 是三级，我们多一级 PATH 兜底。
+
 ## 0.12.3 — 2026-11-04
 
 ### node 路径不能再拿 process.execPath 当 node
