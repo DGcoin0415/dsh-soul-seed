@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import os from 'node:os'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -6,7 +7,7 @@ import { writeFileRetry } from './write-retry.mjs'
 // 日档自动整理：从当天 12 小时页里挑 master 说的话，落成一份日档。
 // 用法：node memory-daily.mjs [--date 2026-11-03] [--force]
 // 不调模型、不花钱；只做筛选和截断，细节仍旧回当天全量页看。
-const IM = path.join(os.homedir(), '.dsh/im')
+const IM = sharedHome()
 const PAGE_DIR = path.join(IM, 'shared/全量/页')
 const DAY_DIR = path.join(IM, 'shared/记忆本/日')
 
