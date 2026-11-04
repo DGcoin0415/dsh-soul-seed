@@ -1,7 +1,8 @@
 ﻿param([string]$Agents, [switch]$Check)
 
-$Shared = "C:\Users\Administrator\.dsh\im\SHARED-STATE.md"
-$Home2 = "C:\Users\Administrator\.dsh\im"
+$Home2 = if ($env:DSH_SHARED_DIR) { $env:DSH_SHARED_DIR } elseif ($env:SOUL_HOME) { $env:SOUL_HOME } else { Join-Path $env:USERPROFILE ".dsh\im" }
+$Shared = Join-Path $Home2 "SHARED-STATE.md"
+
 $Config = Join-Path $Home2 "sync-workspaces.json"
 $LogFile = Join-Path $Home2 "sync.log"
 if (-not (Test-Path $Shared)) { exit 0 }
@@ -19,7 +20,7 @@ function Get-Roots {
       foreach ($p in $j.workspaces) { if ($p) { $roots += $p } }
     } catch { Write-Log "sync-workspaces.json 读不了：$_" }
   }
-  Get-ChildItem "C:\Users\Administrator\.dsh\integrations" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+  Get-ChildItem (Join-Path $env:USERPROFILE ".dsh\integrations") -Directory -ErrorAction SilentlyContinue | ForEach-Object {
     $w = Join-Path $_.FullName "workspaces.json"
     if (Test-Path $w) {
       try {
@@ -32,7 +33,7 @@ function Get-Roots {
 }
 
 # 同步前先把面板对话导出来，树状里的 chat.md 保持最新
-$nodeExe = "C:\Users\Administrator\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
+$nodeExe = (Get-Command node -ErrorAction SilentlyContinue).Source
 $exportScript = Join-Path $Home2 "export-chat.mjs"
 if ((Test-Path $nodeExe) -and (Test-Path $exportScript)) { & $nodeExe $exportScript *> $null }
 
@@ -102,7 +103,7 @@ if ($Check) {
 if ($Agents) { $changed = Sync-One $Agents; Write-Log ("单点同步 " + $Agents + " 改动=" + $changed); exit 0 }
 
 # 拿写锁：别人正在改共享页就跳过这一轮，免得撞车
-$nodeExe2 = "C:\Users\Administrator\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
+$nodeExe2 = (Get-Command node -ErrorAction SilentlyContinue).Source
 $lockScript = Join-Path $Home2 "shared-lock.mjs"
 $locked = $false
 if ((Test-Path $nodeExe2) -and (Test-Path $lockScript)) {
