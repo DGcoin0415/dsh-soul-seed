@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## 0.12.2 — 2026-11-04
+
+### 去掉「只在作者机器上能跑」的路径，两个目录彻底分开
+
+**问题一：变量名撞车。** `lib/rag.mjs` 原本也读 `DSH_SOUL_DIR`，但它指的是共享工作区；`lib/home.mjs` 指的是灵魂数据。同一个名字两个意思，设了就互相干扰。
+
+现在分开：
+
+| 放什么 | 默认 | 变量 |
+|---|---|---|
+| 灵魂数据（人设/记忆/账本/心情/历史） | `~/.dsh/soul-seed/` | `DSH_SOUL_DIR` |
+| 共享工作区（落叶/全量页/索引/规矩） | `~/.dsh/im/` | `DSH_SHARED_DIR`（老变量 `SOUL_HOME` 仍认） |
+
+新增 `lib/shared.mjs` 的 `sharedHome()` / `sharedPath()`，`lib/rag.mjs` 与 15 个工具改用它。
+
+**问题二：硬编码绝对路径。** 这些文件原来写死了作者的机器路径，别人装上直接跑不通：
+
+- `tools/01-memory/{export-full,memory-hit,memory-note}.mjs`
+- `tools/07-sync/{rule-change.mjs,sync-shared.ps1}`
+- `tools/11-rag/memory-find.mjs`
+- `tools/14-pages/*.mjs`、`tools/17-mood/sync-mood.mjs`、`tools/18-guard/*.mjs`、`tools/19-memory/*.mjs`
+- `lib/tidy.mjs`（node 路径 → `process.execPath`）
+- `tools/10-voice/voice.py`（ffmpeg → `shutil.which`）
+
+全部改成从 `os.homedir()` 或环境变量派生。
+
+**问题三：示例配置里有作者的真实路径**，换成占位符 `C:\\Users\\<你>\\.dsh\\im`。
+
+**为什么值得单独发一版**：这三条都只影响「别人装上能不能跑」，在作者自己机器上一点症状都没有 —— 正是这种问题最容易带着上架。
+
 ## 0.12.1 — 2026-11-04
 
 ### 路径解析只剩两级，仓库里不再出现老目录名
