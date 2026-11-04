@@ -13,14 +13,11 @@ os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 def _soul_root():
-    """灵魂数据目录：DSH_SOUL_DIR > ~/.dsh/soul-seed > ~/.bili-ai（老位置，存在就继续用）"""
+    """灵魂数据目录：DSH_SOUL_DIR 优先，否则 ~/.dsh/soul-seed。"""
     env = os.environ.get("DSH_SOUL_DIR") or os.environ.get("SOUL_SEED_ROOT")
     if env:
         return Path(env)
-    fresh = Path.home() / ".dsh" / "soul-seed"
-    legacy = Path.home() / ".bili-ai"
-    if fresh.exists():
-        return fresh
+    return Path.home() / ".dsh" / "soul-seed"
     if legacy.exists():
         return legacy
     return fresh
