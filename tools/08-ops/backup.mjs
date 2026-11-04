@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // backup.mjs —— 一键把这些东西打包（不给平台添麻烦：Windows 用 Compress-Archive，其它用 tar）
 //
 //   node tools/08-ops/backup.mjs                打包到 ~/Downloads (或 ~)
@@ -12,7 +13,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
-const DIR = path.join(os.homedir(), ".bili-ai");
+const DIR = soulHome();
 const argv = process.argv.slice(2);
 const opt = (n, d = null) => { const i = argv.indexOf("--" + n); return i > -1 ? argv[i + 1] : d };
 const outDir = opt("out", "") || (fs.existsSync(path.join(os.homedir(), "Downloads")) ? path.join(os.homedir(), "Downloads") : os.homedir());
@@ -49,7 +50,7 @@ for (const rel of INCLUDED) {
   }
   n++;
 }
-if (!n) { console.error("没有可备份的数据（~/.bili-ai 还是空的）"); process.exit(1) }
+if (!n) { console.error("没有可备份的数据（~/.dsh/soul-seed 还是空的）"); process.exit(1) }
 
 fs.mkdirSync(outDir, { recursive: true });
 if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
