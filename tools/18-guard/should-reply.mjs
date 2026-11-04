@@ -6,7 +6,7 @@ import path from 'node:path'
 // 退出码：0 该接（或该交给模型判断），2 不接
 //   --list 只看规则
 import os from 'node:os'
-const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
+const HOME = sharedHome()
 const CONF = path.join(HOME, 'shared', '接话.json')
 const LOG = path.join(HOME, 'shared', '接话日志.jsonl')
 
