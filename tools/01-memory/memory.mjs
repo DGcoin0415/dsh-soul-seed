@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // memory.mjs —— 长期记忆：会淡忘，才记得住重要的
 //
 //   node memory.mjs add "master 说他不吃香菜" --imp 4 --tag 偏好
@@ -14,7 +15,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const FILE = path.join(os.homedir(), ".bili-ai", "memory.json");
+const FILE = path.join(soulHome(), "memory.json");
 const argv = process.argv.slice(2);
 const cmd = argv[0] ?? "recall";
 const VALUED = new Set(["imp", "tag", "n"]);
