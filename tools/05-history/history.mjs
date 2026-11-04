@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // history.mjs —— 历史：只记「定下来的事」，一件事一行
 //
 //   node tools/05-history/history.mjs add "决定：不再私信分享，改走微信" 
@@ -9,7 +10,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const DIR = path.join(os.homedir(), ".bili-ai", "history");
+const DIR = path.join(soulHome(), "history");
 const argv = process.argv.slice(2);
 const cmd = argv[0] ?? "show";
 const now = new Date();
