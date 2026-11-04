@@ -4,7 +4,7 @@
 #   python tools/10-voice/voice.py --listen          一直听，识别到的写进 shared/语音输入.md
 #   python tools/10-voice/voice.py --say "要念的话"   念一句（耳机）
 #   python tools/10-voice/voice.py --once 5          录 5 秒转一次，打印结果
-import argparse, json, os, queue, sys, time, wave
+import shutil, argparse, json, os, queue, sys, time, wave
 from datetime import datetime
 from pathlib import Path
 
@@ -73,7 +73,7 @@ def say_xiaoyi(text, rate="-10%"):
 
 def play_mp3(path):
     import subprocess
-    ff = r"C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\ffmpeg.exe"
+    ff = shutil.which("ffmpeg") or "ffmpeg"
     # 转成 wav 再用 winsound 放，避免依赖播放器
     wav = VOICE / "last_reply_play.wav"
     subprocess.run([ff, "-y", "-i", str(path), str(wav)], capture_output=True)
