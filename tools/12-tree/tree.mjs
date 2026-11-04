@@ -7,10 +7,11 @@ import os from 'node:os'
 import path from 'node:path'
 import { recentTurns } from '../../lib/turnlog.mjs'
 import { tidy } from '../../lib/tidy.mjs'
+import { soulHome } from '../../lib/home.mjs'
 
 const soul = process.env.SOUL_SEED_ROOT?.trim()
   ? path.resolve(process.env.SOUL_SEED_ROOT.trim())
-  : path.join(os.homedir(), '.bili-ai')
+  : soulHome()
 
 const [, , cmd, ...rest] = process.argv
 
