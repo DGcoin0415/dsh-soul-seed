@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // people.mjs —— 按人账本 v2
 //
 // 每人：好感 / 心情 / 见面次数 / 事件 / 习惯 / 人情账 / 私藏
@@ -34,7 +35,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const FILE = path.join(os.homedir(), ".bili-ai", "people.json");
+const FILE = path.join(soulHome(), "people.json");
 const SECRET_MIN_GOODWILL = 70;
 
 const argv = process.argv.slice(2);
@@ -261,7 +262,7 @@ if (cmd === "show" || cmd === "list") {
 
 // ═══════════ 记仇 + 报复链（原 tools/02-people/people.mjs，并进来少一个文件） ═══════════
 function handleGrudge(rawArgv) {
-  const GRUDGE_FILE = path.join(os.homedir(), ".bili-ai", "grudge.json");
+  const GRUDGE_FILE = path.join(soulHome(), "grudge.json");
   const argv = rawArgv;
   const cmd = argv[0] ?? "list";
   const pos = (() => {
