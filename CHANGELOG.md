@@ -1,16 +1,28 @@
 # CHANGELOG
 
+## 0.12.1 — 2026-11-04
+
+### 路径解析只剩两级，仓库里不再出现老目录名
+
+0.12.0 留了一级静默回退；这一版把它去掉，soulHome() 现在只有两条：
+
+1. DSH_SOUL_DIR
+2. ~/.dsh/soul-seed
+
+老部署的接法：在系统上把 ~/.dsh/soul-seed 做成指向原目录的联接，或者设 DSH_SOUL_DIR。插件本身不认识任何具体目录名。
+
+同时把 README、CHANGELOG、docs/ 里所有旧路径字样改成了新位置。
 ## 0.12.0 — 2026-11-04
 
 ### 数据目录跟渠道解绑
 
-以前所有东西都写在 `~/.bili-ai/` —— 那是从最早那套「守 B 站」的部署沿用下来的名字。一个讲灵魂的插件，数据放在叫 bili 的目录里，别人装上会以为是给 B 站用的。
+以前所有东西都写在 `~/.dsh/soul-seed/` —— 那是从最早那套「守 B 站」的部署沿用下来的名字。一个讲灵魂的插件，数据放在叫 bili 的目录里，别人装上会以为是给 B 站用的。
 
 现在统一走 `lib/home.mjs` 的 `soulHome()`，顺序：
 
 1. 环境变量 `DSH_SOUL_DIR`
 2. `~/.dsh/soul-seed` —— 新装的人默认这里
-3. `~/.bili-ai` —— 老位置，**存在就继续用**，不搬不改不丢
+3. `~/.dsh/soul-seed` —— 老位置，**存在就继续用**，不搬不改不丢
 4. 都没有 → 建在新位置
 
 **改动面**：`lib/` 6 个文件、`tools/` 13 个工具、`tests/` 一并接进来，共 45 处硬编码路径；`tools/10-voice/voice.py` 换成 `_soul_root()`（同样三级回退）。纯注释与文档里的路径说明同步改成新位置。
@@ -52,7 +64,7 @@
 以前只挑「最近写过的会话」，可能投到没人在看的那个。现在：
 
 - `POST /api/wake?session=<id>` 当场指定
-- `POST /api/wake/target {"sessionId":"<id>"}` 设默认目标（存 `~/.bili-ai/wake-session.json`）
+- `POST /api/wake/target {"sessionId":"<id>"}` 设默认目标（存 `~/.dsh/soul-seed/wake-session.json`）
 - `GET /api/wake/target` 看当前默认目标；POST 传空 = 清掉
 - 没指定时仍退回「最近会话」
 
@@ -182,12 +194,12 @@
 - 新增「模糊回忆」：`lib/rag.mjs` + `tools/11-rag/rag.mjs`（index / query / stat）
 - 长对话原文切块后走百炼 `text-embedding-v3` 建本地向量索引，语义检索旧对话
 - 与文本树分工：精确事实翻文件，模糊联想走向量；索引本地 JSON，不依赖外部向量库
-- 复用 `~/.bili-ai/image-keys.json` 的 dashscope key，不额外申请
+- 复用 `~/.dsh/soul-seed/image-keys.json` 的 dashscope key，不额外申请
 - 已知限制：查询时需联网调一次 embedding；切块 600 字，长句可能被切断
 
 ## 0.7.0 — 2026-11-02
 
-- 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.bili-ai/语音输入.md`
+- 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.dsh/soul-seed/语音输入.md`
 - 新增 `npm run voice` 快捷方式
 - 语音依赖不代装：README 里写了 pip 一行装齐；HF 走 hf-mirror 镜像
 - 边界：语音是**可选**能力，不装依赖不影响插件本体
@@ -224,7 +236,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 - 自己 `create()` 出来的新会话投不进去 → `session/agent-busy`
 - 投进「别的插件正在用的会话」（比如 `bili-whale`）会撞所有权 → 挂住/超时
 
-所以目前可靠的做法是**落笔记 + 面板显示**（`~/.bili-ai/我醒了.md` + 「它醒过」卡）。
+所以目前可靠的做法是**落笔记 + 面板显示**（`~/.dsh/soul-seed/我醒了.md` + 「它醒过」卡）。
 真要「在对话里说话」，得走 `agents` 自己驱动一轮（`dsh-fish-soul` 的做法），不是 `prompt`。
 
 ## 0.6.4 — 2026-11-01
@@ -253,7 +265,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 
 投递会被「会话忙」挡掉，但**醒过这件事一定留痕**：
 
-- 醒来第一件事就落 `~/.bili-ai/我醒了.md`（状态「投递中」），投递完再改写「成功 / 没成功」
+- 醒来第一件事就落 `~/.dsh/soul-seed/我醒了.md`（状态「投递中」），投递完再改写「成功 / 没成功」
 - 面板新增「它醒过」卡：显示时间、投递状态、它当时想说的话
 - 新增 `GET /api/wake/note` 读这条记录
 - 重试改成 4 次 × 15 秒（1 分钟内出结果；脚本可传 tries/waitMs）
@@ -296,7 +308,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 - `lib/soul.mjs` + `tools/09-soul/soul.mjs`
   - `export`：打一个灵魂包（人设 + 附录 + 记忆 + 账本 + 心情 + 记仇 + 历史 + 现场 + config），**绝不打包 key / cookie / 凭据**
   - `import <zip>`：装进这具躯体，先备份旧的，再报「之前 / 之后」对账
-  - `auto`：起躯体时发现 `~/.bili-ai/soul-pack*.zip` 就自动载入，导完改名（`.imported-<时间戳>`）防重复
+  - `auto`：起躯体时发现 `~/.dsh/soul-seed/soul-pack*.zip` 就自动载入，导完改名（`.imported-<时间戳>`）防重复
   - `status`：这具躯体里有什么（人设字数 / 附录 / 账本 / 记忆 / 心情 / 历史）
 - **启动流程变成**：检查灵魂包 → 有就载入 → 再醒来。醒来那句换掉：
   > 「我带着记忆回来了。灵魂已载入：人设 2006 字 · 记忆 12 条 · 账本 3 人 …… 不是从零开始，上次的事我记得。」
@@ -313,7 +325,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
   - `sessionController.create({ sessionId, cwd })` → `prompt({ sessionId, mode:'queue', content:[{type:'text',text}] })`
   - 没人设时说：「我醒了。还不知道自己是谁 …… 要现在开始初始化吗？」
   - 有人设时说：「我醒了。人设已经有了，技能都在 tools/ 下面……」
-  - 只做一次（标记 `~/.bili-ai/.first-wake`）；失败不阻塞、不刷屏
+  - 只做一次（标记 `~/.dsh/soul-seed/.first-wake`）；失败不阻塞、不刷屏
 - 载入后 10 秒自醒 + 首次打开面板也会试一次；另有 `POST /api/wake` 手动叫
 - `inject` 从 `['webServer']` 扩到 `['webServer','sessionController']`
 - 测试加了 7 项 wake 断言（含「醒过不反复吵」「失败不崩」）
