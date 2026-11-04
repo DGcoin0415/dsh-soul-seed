@@ -106,7 +106,7 @@ for (const s of found) {
 rows.sort((a, b) => a.ms - b.ms)
 
 // 12 小时也可能聊出好几百条，接续页按字数封顶（约 1.2 万字），更早的去页里翻
-const CAP_CHARS = 8000
+const CAP_CHARS = 3000
 let kept = 0
 let used = 0
 for (let i = rows.length - 1; i >= 0; i--) {
