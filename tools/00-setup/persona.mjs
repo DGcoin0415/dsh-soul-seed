@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // persona.mjs —— 人设生成 CLI（给「鱼自己问、自己写」用，不需要人填表单）
 //
 // 用法：
 //   node tools/00-setup/persona.mjs --questions        打印十个问题（JSON，给 agent 照着问）
 //   node tools/00-setup/persona.mjs --rules            打印默认铁律（部署时给人看，允许删改）
-//   node tools/00-setup/persona.mjs --answers a.json   用答案生成人设，写到 ~/.bili-ai/persona-draft.json
-//   node tools/00-setup/persona.mjs --apply            把草稿写进 ~/.bili-ai/persona.md（旧文件备份）
+//   node tools/00-setup/persona.mjs --answers a.json   用答案生成人设，写到 ~/.dsh/soul-seed/persona-draft.json
+//   node tools/00-setup/persona.mjs --apply            把草稿写进 ~/.dsh/soul-seed/persona.md（旧文件备份）
 //   node tools/00-setup/persona.mjs --show             看当前草稿 / 已写入的人设
 //
 // 答案 JSON 长这样：
@@ -18,7 +19,7 @@ import path from "node:path";
 import { QUESTIONS, SPEECH_QUESTIONS, SET_QUESTIONS, RULES_QUESTION, DEFAULT_RULES, composePersona, checkPersona, extrasFor } from "../../lib/persona.mjs";
 import { composeSpeech } from "../../lib/presets.mjs";
 
-const DATA = path.join(os.homedir(), ".bili-ai");
+const DATA = soulHome();
 const DRAFT = path.join(DATA, "persona-draft.json");
 const TARGET = path.join(DATA, "persona.md");
 
@@ -102,5 +103,5 @@ console.log(`用法：
   node tools/00-setup/persona.mjs --questions        十个问题（给鱼照着问）
   node tools/00-setup/persona.mjs --rules            默认铁律\n  node tools/00-setup/persona.mjs --speech           说话风格题 + 默认台词手册\n  node tools/00-setup/persona.mjs --sets             现场/历史/素材 三块可选套
   node tools/00-setup/persona.mjs --answers a.json   生成人设草稿
-  node tools/00-setup/persona.mjs --apply            写进 ~/.bili-ai/persona.md
+  node tools/00-setup/persona.mjs --apply            写进 ~/.dsh/soul-seed/persona.md
   node tools/00-setup/persona.mjs --show             看草稿 / 已写入的那份`);
