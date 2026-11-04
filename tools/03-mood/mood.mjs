@@ -1,3 +1,5 @@
+import { soulHome } from '../../lib/home.mjs'
+
 // mood.mjs v4 —— 米芾的今日心情（六维 + 半衰期 + 惯性 + 综合分）
 //
 // 六个维度（各 0-100）：
@@ -24,10 +26,10 @@ const DIARY = path.join(DSH, "whale-diary.md");
 const LOG = path.join(DSH, "whale-log.jsonl");
 const NIGHT = path.join(DSH, "whale-night.json");
 const CFG = path.join(DSH, "bili-whale.config.json");
-const CRED = path.join(HOME, ".bili-ai", "credentials.json");
-const MOODCFG = path.join(HOME, ".bili-ai", "mood-config.json");
-const PEOPLE = path.join(HOME, ".bili-ai", "people.json");
-const OUT = path.join(HOME, ".bili-ai", "mood.json");
+const CRED = path.join(soulHome(), "credentials.json");
+const MOODCFG = path.join(soulHome(), "mood-config.json");
+const PEOPLE = path.join(soulHome(), "people.json");
+const OUT = path.join(soulHome(), "mood.json");
 
 const argv = process.argv.slice(2);
 const dry = argv.includes("--dry");
