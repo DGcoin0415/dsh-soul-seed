@@ -30,6 +30,17 @@
 
 里面放的是：`persona.md`（它是谁）、`persona-附录/`、`mood.json`（心情）、`people.json`（按人账本）、`memory.json`（记忆）、`grudge.json`（记仇，默认关）、`history/`（每月历史）、`scene/`（在忙什么）。
 
+## 两个目录，两个变量
+
+插件把东西分两头放，别混：
+
+| 放什么 | 默认位置 | 改它的变量 |
+|---|---|---|
+| **灵魂数据** —— 人设、记忆、账本、心情、历史 | `~/.dsh/soul-seed/` | `DSH_SOUL_DIR` |
+| **共享工作区** —— 落叶、全量页、索引、规矩、现在.md | `~/.dsh/im/` | `DSH_SHARED_DIR`（老变量 `SOUL_HOME` 仍认） |
+
+两个变量的名字不同，就是为了不让它们互相串。老部署升级上来：数据还在原处就不动，路径写在默认位置就不用设；写在别处就把对应的变量指过去。
+
 ## 不是第一次部署？（v0.6.7 起自动判断）
 
 插件装完会先看一眼这台机器：`~/.dsh/soul-seed/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
@@ -103,7 +114,7 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 
 - 平时只露常驻工具，其余按组藏起来，连参数定义都不发
 - 要用时 `tool_gate({"action":"open","group":"生图"})` 开一组，本会话有效
-- 配置在 `~/.dsh/im/tool-groups.json`
+- 配置在共享工作区下的 `tool-groups.json`（默认 `~/.dsh/im/`，可用 `DSH_SHARED_DIR` 改）
 
 装法看上游 README。上游 1.0.0 声明的运行时范围是 DSH 0.1.x；在 0.2.x 上装会被版本检查拦下，需要自行判断风险。
 
