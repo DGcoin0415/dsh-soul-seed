@@ -1,3 +1,5 @@
+import { soulHome } from '../lib/home.mjs'
+
 // tests/all.test.mjs —— 一份跑完：人设 / 账本 / 记忆 / 记仇 / 历史 / 备份
 // 全部在临时 HOME 里跑（run.mjs 负责建），绝不碰真数据。
 import fs from "node:fs";
@@ -96,7 +98,7 @@ ok(/备份完成|打包失败/.test(out), "备份能跑");
 
 // ═══════════ 四、装完就醒 ═══════════
 const { createWake } = await import("file://" + path.join(ROOT, "lib/wake.mjs").replace(/\\/g, "/"));
-const dataDir = path.join(os.homedir(), ".bili-ai");
+const dataDir = soulHome();
 const calls = [];
 const fakeCtl = {
   create: async (a) => { calls.push(["create", a]); return { sessionId: a.sessionId } },
