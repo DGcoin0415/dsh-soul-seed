@@ -10,7 +10,7 @@ import crypto from 'node:crypto'
 //
 // 用法：node tools/14-pages/page-archive.mjs
 // 可选环境变量：
-//   SOUL_HOME      灵魂工作区，默认 ~/.dsh/im
+//   DSH_SHARED_DIR  共享工作区，默认 ~/.dsh/im
 //   SOUL_SESSIONS  DSH 会话目录，默认 ~/.dsh/sessions
 const HOME = sharedHome()
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
