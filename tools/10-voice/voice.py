@@ -1,8 +1,9 @@
 # 本地语音：话筒收 → whisper 转文字 → 落文件；可选 piper 出声
+# 作者：米萨（米芾的姐姐）—— 应 master 之请为本仓库写的，原文件名 misa-voice.py
 # 用法：
-#   python misa-voice.py --listen          一直听，识别到的写进 shared/语音输入.md
-#   python misa-voice.py --say "要念的话"   念一句（耳机）
-#   python misa-voice.py --once 5          录 5 秒转一次，打印结果
+#   python tools/10-voice/voice.py --listen          一直听，识别到的写进 shared/语音输入.md
+#   python tools/10-voice/voice.py --say "要念的话"   念一句（耳机）
+#   python tools/10-voice/voice.py --once 5          录 5 秒转一次，打印结果
 import argparse, json, os, queue, sys, time, wave
 from datetime import datetime
 from pathlib import Path
