@@ -1,6 +1,7 @@
 import os from 'node:os'
 import fs from 'node:fs'
 import path from 'node:path'
+import { writeFileRetry } from './write-retry.mjs'
 
 // 日档自动整理：从当天 12 小时页里挑 master 说的话，落成一份日档。
 // 用法：node memory-daily.mjs [--date 2026-11-03] [--force]
@@ -87,5 +88,5 @@ const body = [
   '',
 ].join('\n')
 
-fs.writeFileSync(outFile, body, 'utf8')
+writeFileRetry(outFile, body)
 console.log(`写进 ${target}.md：${picked.length} 条`)

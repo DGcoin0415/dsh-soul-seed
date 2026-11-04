@@ -1,25 +1,22 @@
+import os from 'node:os'
+import path from 'node:path'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import path from 'node:path'
-import os from 'node:os'
+import { writeFileRetry } from '../19-memory/write-retry.mjs'
 
-// 心情同步：跑一遍心情脚本，把结果写进 shared/mood.md 和那本人设卡。
-// 用法：node tools/17-mood/sync-mood.mjs [--force] [--no-shared]
-//   SOUL_HOME     灵魂工作区（默认 ~/.dsh/im）
-//   SOUL_MOOD_DIR 心情脚本所在目录（默认 ~/.bili-ai，里面要有 mood.mjs / mood.json）
-const SOUL = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
-const MOOD_DIR = process.env.SOUL_MOOD_DIR || path.join(os.homedir(), '.bili-ai')
-const MOOD_JSON = path.join(MOOD_DIR, 'mood.json')
-const SHARED = path.join(SOUL, 'shared', 'mood.md')
-const STAMP = path.join(SOUL, '.mood-sync-stamp.json')
-const CARD = path.join(os.homedir(), '.dsh', 'persona-cards', 'memories', 'card-mvqnzinf.json')
+const NODE = path.join(os.homedir(), '.dsh/dsh-runtimes/dsh-primary-runtime/dependencies/node/bin/node.exe')
+const MOOD_DIR = path.join(os.homedir(), '.bili-ai')
+const MOOD_JSON = MOOD_DIR + '/mood.json'
+const SHARED = path.join(os.homedir(), '.dsh/im/shared/mood.md')
 const MARK = '## MOOD-AUTO 当前心情'
+
+const STAMP = path.join(os.homedir(), '.dsh/im/.mood-sync-stamp.json')
 
 function runMood() {
   try {
-    execFileSync(process.execPath, ['mood.mjs'], { cwd: MOOD_DIR, timeout: 120000, stdio: 'pipe' })
+    execFileSync(NODE, ['mood.mjs'], { cwd: MOOD_DIR, timeout: 120000, stdio: 'pipe' })
     return true
-  } catch {
+  } catch (e) {
     return false
   }
 }
@@ -30,7 +27,7 @@ function readStamp() {
 
 function writeStamp(entry) {
   const key = `${entry.mood?.composite}|${entry.mood?.name}|${entry.mood?.emotion?.label}`
-  writeFileSync(STAMP, JSON.stringify({ at: entry.at, key }), 'utf8')
+  writeFileRetry(STAMP, JSON.stringify({ at: entry.at, key }))
 }
 
 function latest() {
@@ -41,11 +38,16 @@ function latest() {
 function fmt(entry) {
   const m = entry.mood || {}
   const when = new Date().toLocaleString('zh-CN', { hour12: false })
+  const name = m.name || '?'
+  const comp = m.composite ?? '?'
+  const emo = m.emotion?.label ?? '?'
+  const band = m.policy?.band ?? '?'
+  const feel = m.flags?.feeling || m.why?.[0] || ''
   const lines = [
     MARK,
     '',
     `- 更新时间：${when}`,
-    `- 心情：${m.name || '?'}（综合 ${m.composite ?? '?'}/100）· 情绪 ${m.emotion?.label ?? '?'} · 说话档 ${m.policy?.band ?? '?'}`,
+    `- 心情：${name}（综合 ${comp}/100）· 情绪 ${emo} · 说话档 ${band}`,
   ]
   if (m.reason) lines.push(`- 来源：${m.reason}`)
   if (m.policy?.note) lines.push(`- 说话方式：${m.policy.note}`)
@@ -53,7 +55,6 @@ function fmt(entry) {
   return lines.join('\n')
 }
 
-// 同一个区块直接覆盖，不追加第二份
 function updateShared(block) {
   let text = existsSync(SHARED) ? readFileSync(SHARED, 'utf8') : ''
   const start = text.indexOf(MARK)
@@ -65,17 +66,38 @@ function updateShared(block) {
   } else {
     text = text.trimEnd() + '\n\n' + block
   }
-  writeFileSync(SHARED, text, 'utf8')
+  writeFileRetry(SHARED, text)
 }
 
 function updateCard(entry) {
-  if (!existsSync(CARD)) return false
+  const card = path.join(os.homedir(), '.dsh/persona-cards/memories/card-mvqnzinf.json')
+  if (!existsSync(card)) return false
   try {
-    const d = JSON.parse(readFileSync(CARD, 'utf8'))
+    const d = JSON.parse(readFileSync(card, 'utf8'))
     const m = entry.mood || {}
     d.mood = `${m.name ?? '平常心'}（${m.composite ?? '?'}/100，${m.emotion?.label ?? '照常'}）`
     d.updatedAt = new Date().toISOString()
-    writeFileSync(CARD, JSON.stringify(d, null, 2), 'utf8')
+    writeFileRetry(card, JSON.stringify(d, null, 2))
+    return true
+  } catch {
+    return false
+  }
+}
+
+// 顺手把「现在」那页的心情一行也刷了：新会话开局读它，别写成一成不变的心情
+function updateNow(entry) {
+  const nowFile = path.join(os.homedir(), '.dsh/im/shared/现在.md')
+  if (!existsSync(nowFile)) return false
+  try {
+    const m = entry.mood || {}
+    const line = `- ${m.name ?? '平常心'}（${m.composite ?? '?'}/100，${m.emotion?.label ?? '照常'}）。`
+    const text = readFileSync(nowFile, 'utf8')
+    const i = text.indexOf('## 心情')
+    if (i < 0) return false
+    const head = text.slice(0, i)
+    const rest = text.slice(i)
+    const updated = rest.replace(/^## 心情[\s\S]*?(?=\n## |$)/, `## 心情\n\n${line}\n`)
+    writeFileRetry(nowFile, head + updated)
     return true
   } catch {
     return false
@@ -84,10 +106,7 @@ function updateCard(entry) {
 
 runMood()
 const entry = latest()
-if (!entry) {
-  console.log('没读到心情记录：' + MOOD_JSON)
-  process.exit(1)
-}
+if (!entry) { console.log('no mood entry'); process.exit(1) }
 
 const stamp = readStamp()
 const force = process.argv.includes('--force')
@@ -97,7 +116,9 @@ if (!force && stamp.key && stamp.key === key) {
   process.exit(0)
 }
 
+// 写进公用记忆（同一区块直接覆盖，不追加）；--no-shared 时只改人设卡
 if (!process.argv.includes('--no-shared')) updateShared(fmt(entry))
+const nowOk = updateNow(entry)
 const cardOk = updateCard(entry)
 writeStamp(entry)
-console.log('同步完成', entry.mood?.name, entry.mood?.composite, cardOk ? '+人设卡' : '')
+console.log('synced', entry.mood?.name, entry.mood?.composite, cardOk ? '+card' : '', nowOk ? '+now' : '')

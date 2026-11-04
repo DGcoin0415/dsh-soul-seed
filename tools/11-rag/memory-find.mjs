@@ -16,14 +16,17 @@ const topI = args.indexOf('--top')
 const TOP = topI >= 0 ? Number(args[topI + 1]) : 3
 const budgetI = args.indexOf('--budget')
 const BUDGET = budgetI >= 0 ? Number(args[budgetI + 1]) : 1600
+const tagI = args.indexOf('--tag')
+const TAG = tagI >= 0 ? String(args[tagI + 1] || '').toLowerCase() : ''
 
 // 三块配额：路径清单 1/4，摘要正文不到一半，向量兜底三成，谁也不能借谁的
 const SLICE = { paths: Math.round(BUDGET * 0.4), summaries: Math.round(BUDGET * 0.35), vectors: Math.round(BUDGET * 0.25) }
 
-const query = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--top' && args[i - 1] !== '--budget').join(' ').trim()
+const OMIT = new Set(['--top', '--budget', '--tag'])
+const query = args.filter((a, i) => !a.startsWith('--') && !OMIT.has(args[i - 1])).join(' ').trim()
 
-if (!query) {
-  console.log('用法：node memory-find.mjs "想问的事" [--rag] [--budget 1600]')
+if (!query && !TAG) {
+  console.log('用法：node memory-find.mjs "想问的事" [--rag] [--budget 1600] [--tag 标签]')
   process.exit(1)
 }
 
@@ -44,11 +47,20 @@ const rows = fs
   .split('\n')
   .filter(Boolean)
   .map((l) => JSON.parse(l))
+  .filter((r) => !TAG || (r.tags || []).some((t) => String(t).toLowerCase().includes(TAG)))
+
+// 只给标签、没给问题：按标签列最近的条目，不打分
+if (!query && TAG) {
+  const hit = [...rows].sort((a, b) => (b.mtime || 0) - (a.mtime || 0)).slice(0, TOP)
+  console.log(`[标签] ${TAG} · 共 ${rows.length} 条`)
+  for (const r of hit) console.log(`- ${r.path}  [${(r.tags || []).join('/')}]`)
+  process.exit(0)
+}
 
 const STOP = new Set(['怎么', '什么', '在哪', '那个', '一下', '这个', '为啥', '哪里', '多少', '可以', '是不是'])
 const qt = [...tok(query)].filter((t) => !STOP.has(t))
 const df = new Map()
-const docs = rows.map((r) => tok(`${r.path} ${r.name} ${r.summary} ${(r.heads || []).join(' ')}`))
+const docs = rows.map((r) => tok(`${r.path} ${r.name} ${r.summary} ${(r.heads || []).join(' ')} ${(r.tags || []).join(' ')}`))
 for (const d of docs) for (const t of d) df.set(t, (df.get(t) || 0) + 1)
 const idf = (t) => Math.log(1 + rows.length / (df.get(t) || 1))
 const asciiQ = qt.filter((t) => /^[a-z0-9_./-]{2,}$/.test(t))
@@ -86,7 +98,8 @@ let dropped = 0
 out.push(`[召回] ${verdict}  最高 ${best.toFixed(2)} · 预算 ${BUDGET}`)
 if (top.length) {
   for (const r of top) {
-    const pLine = `- ${r.score.toFixed(2)}  ${r.path}`
+    const tagStr = (r.tags || []).length ? `  [${(r.tags || []).slice(0, 3).join('/')}]` : ''
+    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${tagStr}`
     if (pathUsed + len(pLine) > SLICE.paths) {
       dropped += 1
       continue

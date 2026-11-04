@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.10 — 2026-11-04
+
+- 状态快照 `shared/现在.md`：在干什么 / 手头没完的 / 跟人 / 心情，开局整份读（压 2 KB 内）。分层原则写死：快照整份读、记忆库按需查、会话原文不搬
+- 新增 `tools/19-memory/now-update.mjs`：从 `shared/任务.md` 挑进行中/卡住/待办填「手头没完的」，从 `people.json` 取好感最高那位和最近一笔填「跟人」，修枝第 4.5 步自动刷
+- `tools/17-mood/sync-mood.mjs` 顺手把心情刷进状态页的心情块
+- 摘要目录加标签：`tools/19-memory/memory-index.mjs` 每条打 4 个标签（从标题切中文 2–6 字的词 + 英文标识符），本地做不花钱；整文件条目用全部小节标题切，避免被一行正文带偏
+- `tools/11-rag/memory-find.mjs` 加 `--tag`：只给标签不给问题按最近改动列，带问题再加标签就是先筛后查
+- 新增 `tools/19-memory/write-retry.mjs`：写文件遇到 EIO/EPERM/EBUSY 自动等一等重试，最多三次（Windows 上杀软握文件会抛 ReplaceFileW 1175）
+- AGENTS 的「查旧的」第一条改成：新会话第一件事读 `shared/现在.md`
+
 ## 0.11.9 — 2026-11-04
 
 - 修枝不再是「到点就跑、错过就没了」：`lib/tidy.mjs` 记状态文件 `.tidy-schedule.json`，每天 4:10 跑一次，开机发现错过了立刻补一趟，和 12 小时分页一个路子；跑没跑看 `wake.log` 里 `tidy:` 开头的行
