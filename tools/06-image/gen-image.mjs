@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // gen-image.mjs —— 通用生图 / 改图脚本（米芾用的那套流水线）
 //
 // 支持：
@@ -25,7 +26,7 @@
 //   --out      输出路径（默认 ./out-<时间戳>.<自动判断后缀>）
 //   --no-watermark  万相去水印（默认就去）
 //
-// Key 从 ~/.bili-ai/image-keys.json 读：
+// Key 从 ~/.dsh/soul-seed/image-keys.json 读：
 //   { "zhipu": "...", "dashscope": "..." }
 // 也可以临时用环境变量 ZHIPU_KEY / DS_KEY 覆盖。
 import fs from "node:fs";
@@ -48,7 +49,7 @@ const size = arg("size", provider === "zhipu" ? "1152x1536" : "720*1280");
 const ref = arg("ref");
 const out = arg("out", path.join(process.cwd(), "out-" + Date.now()));
 
-const KEYFILE = path.join(os.homedir(), ".bili-ai", "image-keys.json");
+const KEYFILE = path.join(soulHome(), "image-keys.json");
 let keys = {};
 try { keys = JSON.parse(fs.readFileSync(KEYFILE, "utf8")) } catch {}
 const key = provider === "zhipu" ? (process.env.ZHIPU_KEY || keys.zhipu) : (process.env.DS_KEY || keys.dashscope);
