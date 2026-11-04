@@ -1,0 +1,20 @@
+{"q":"任务栏卡住那次是怎么弄好的","expect":["explorer","重新启动"]}
+{"q":"AMD 面板怎么关掉的","expect":["AMD","StartCN"]}
+{"q":"微信待发队列卡住怎么清","expect":["待发","队列"]}
+{"q":"名字叫醒为什么一直失败","expect":["prompt rejected","叫醒"]}
+{"q":"DSH 启动崩 报 BOM 那句话","expect":["BOM","bom"]}
+{"q":"小岛世界是怎么做的","expect":["world","tick"]}
+{"q":"分页的脚本叫什么","expect":["page-archive"]}
+{"q":"工具分组那个插件","expect":["tool_gate","tool-groups"]}
+{"q":"仓库现在版本多少","expect":["0.11"]}
+{"q":"WPS 弹 Normal.dotm 那个","expect":["Normal.dotm","受控文件夹"]}
+{"q":"账本报的 20 元和实际对不上","expect":["134.78"]}
+{"q":"看片日记写哪了","expect":["看片"]}
+{"q":"会话太大很慢怎么解决","expect":["换会话","分页"]}
+{"q":"叫醒那个功能为啥要防刷","expect":["过期","丢标记","3 次"]}
+{"q":"转接头像那张图用的什么形象","expect":["鲸鱼","CC BY"]}
+{"q":"134.78 这个数是怎么来的","expect":["134.78"]}
+{"q":"page-archive.mjs 是干啥的","expect":["page-archive"]}
+{"q":"StartCN StartDVR 那两个任务","expect":["StartCN"]}
+{"q":"wake.log 为什么会涨到九兆","expect":["wake.log"]}
+{"q":"tool_gate 怎么开一组","expect":["tool_gate"]}
