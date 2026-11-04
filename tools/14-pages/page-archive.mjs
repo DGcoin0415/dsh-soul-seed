@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
@@ -11,7 +12,7 @@ import crypto from 'node:crypto'
 // 可选环境变量：
 //   SOUL_HOME      灵魂工作区，默认 ~/.dsh/im
 //   SOUL_SESSIONS  DSH 会话目录，默认 ~/.dsh/sessions
-const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
+const HOME = sharedHome()
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
 const ARCHIVE = SESSIONS + '-archive'
 const OUT_DIR = path.join(HOME, 'shared', '全量', '页')
