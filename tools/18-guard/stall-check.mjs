@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -5,7 +6,7 @@ import path from 'node:path'
 // 用法：node stall-check.mjs --task <任务名> --watch <要盯的路径> [--rounds 2]
 // 退 0：有进展（或第一轮）；退 3：两轮没动，判空转，停手报一句
 import os from 'node:os'
-const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
+const HOME = sharedHome()
 const DIR = path.join(HOME, '.stall')
 
 const args = process.argv.slice(2)
