@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.12.3 — 2026-11-04
+
+### node 路径不能再拿 process.execPath 当 node
+
+上一版把写死的 node 路径换成了 process.execPath，但那在 Electron 宿主里是**主程序**，spawn 它会再开一个 DSH，不是跑脚本。
+
+新增 lib/node.mjs 的 esolveNode()，四级查找：
+
+1. DSH_NODE 环境变量
+2. 扫 ~/.dsh/dsh-runtimes 下 dependencies 里带的 node
+3. 自己 + ELECTRON_RUN_AS_NODE=1（宿主是 electron 时它会当 node 跑）
+4. PATH 里的 node
+
+lib/tidy.mjs 五处调用全部改用它，spawn 时带上对应的 env。
+
+这道坑是姐姐那边自查时发现的 —— 在自己机器上完全正常，换台机器才炸。
+
 ## 0.12.2 — 2026-11-04
 
 ### 去掉「只在作者机器上能跑」的路径，两个目录彻底分开
