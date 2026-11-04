@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { soulHome } from '../../lib/home.mjs'
 // scene.mjs —— 现场：把「现在什么心情 / 在忙什么」落到文件里
 //
 //   node tools/04-scene/scene.mjs busy "在给 master 传 GitHub 仓库"
@@ -10,8 +11,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const DIR = path.join(os.homedir(), ".bili-ai", "scene");
-const MOOD = path.join(os.homedir(), ".bili-ai", "mood.json");
+const DIR = path.join(soulHome(), "scene");
+const MOOD = path.join(soulHome(), "mood.json");
 const argv = process.argv.slice(2);
 const cmd = argv[0] ?? "show";
 
@@ -52,7 +53,7 @@ if (cmd === "busy" || cmd === "chat") {
 
 // ═══════════ 运行状态 + 报错落盘（原 tools/04-scene/scene.mjs） ═══════════
 function handleStatus(rawArgv) {
-  const DIR = path.join(os.homedir(), ".bili-ai");
+  const DIR = soulHome();
   const ERR = path.join(DIR, "im-errors.ndjson");
   const STATUS_TXT = path.join(DIR, "运行状态.txt");
   const argv = rawArgv;
