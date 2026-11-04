@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
@@ -5,8 +6,8 @@ import os from 'node:os'
 
 // 把最近 N 小时的对话抽成一页「接续」，给新会话当开头。
 // 用法：node tools/14-pages/compact-session.mjs [小时数，默认 12]
-// 可选环境变量：SOUL_HOME（默认 ~/.dsh/im）、SOUL_SESSIONS（默认 ~/.dsh/sessions）
-const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
+// 可选环境变量：DSH_SHARED_DIR（默认 ~/.dsh/im；老变量 SOUL_HOME 仍认）、SOUL_SESSIONS（默认 ~/.dsh/sessions）
+const HOME = sharedHome()
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
 const OUT = path.join(HOME, 'shared', '接续.md')
 const HOURS = Number(process.argv[2] || 12)
