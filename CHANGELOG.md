@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.11.9 — 2026-11-04
+
+- 修枝不再是「到点就跑、错过就没了」：`lib/tidy.mjs` 记状态文件 `.tidy-schedule.json`，每天 4:10 跑一次，开机发现错过了立刻补一趟，和 12 小时分页一个路子；跑没跑看 `wake.log` 里 `tidy:` 开头的行
+- 新增 `tools/19-memory/memory-daily.mjs`：把「昨天」master 说的话摘成 `shared/记忆本/日/YYYY-MM-DD.md`，当天已有手记就跳过。只筛不调模型，不花钱；修枝第四步自动跑
+- 新增 `tools/19-memory/path-check.mjs`：指针体检。把根页和 AGENTS 里反引号写的路径挨个走一遍，走不通退 1 报出来，结果记进 `wake.log`；修枝第五步自动跑
+- 新增 `tools/11-rag/memory-find.mjs`：摘要目录检索，输出带三档判断
+  - `MATCHED` 真找到 / `AMBIGUOUS` 只是候选 / `NOT_FOUND` 没有。分数够（≥1.0）且查询词覆盖过半才算 MATCHED，只蹭上一个词的降成候选，不再拍胸脯说找到
+  - 预算切块：默认 1600 字，路径 40%、摘要 35%、向量 25%，三块互不借用；`--budget` 可调，紧了自动少展开并标出来
+  - 顺手过滤 0 分噪声：以前没翻到还会打三条无关摘要
+- 借鉴 dsh-companion-memory 的两个思路（召回自评、预算切块），没装它的插件
+
+## 0.11.8 — 2026-11-04
+
+- 接续页封顶收紧：`tools/14-pages/compact-session.mjs` 字数上限压低，接续不再一份十几 KB
+
 ## 0.11.7 — 2026-11-04
 
 - 检索评测：新增 `tools/11-rag/eval.mjs` 和 `评测.example.jsonl`，用真实提问量 top3 命中和 MRR，改前改后都有数
