@@ -3,9 +3,10 @@ import path from 'node:path'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { writeFileRetry } from '../19-memory/write-retry.mjs'
+import { soulHome } from '../../lib/home.mjs'
 
 const NODE = path.join(os.homedir(), '.dsh/dsh-runtimes/dsh-primary-runtime/dependencies/node/bin/node.exe')
-const MOOD_DIR = path.join(os.homedir(), '.bili-ai')
+const MOOD_DIR = soulHome()
 const MOOD_JSON = MOOD_DIR + '/mood.json'
 const SHARED = path.join(os.homedir(), '.dsh/im/shared/mood.md')
 const MARK = '## MOOD-AUTO 当前心情'
