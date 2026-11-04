@@ -86,15 +86,16 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 
 每轮只带最近这些，上下文从「几 MB」降到「一页」，比任何 prompt 压缩都实在。
 
-## 工具分组、按需开放（0.11.0 新增，可选插件）
+## 工具分组、按需开放（可选，第三方插件）
 
-工具定义的「说明书」每轮都要发一遍，54 个工具就是 1.66 万 token。`tools/15-tool-gate` 是个独立小插件：
+工具定义的「说明书」每轮都要发一遍。这一层**不在本仓库里**：它由第三方插件 `dsh-tool-gate` 提供，作者 7gzgn，上游在 [ShehabYahya/DSH-Tool-Gate](https://github.com/ShehabYahya/DSH-Tool-Gate)，npm 包名 `dsh-tool-gate`。
 
 - 平时只露常驻工具，其余按组藏起来，连参数定义都不发
 - 要用时 `tool_gate({"action":"open","group":"生图"})` 开一组，本会话有效
-- 顺手把每个参数说明压到 22 字，`pwsh` 这类保留全文
+- 配置在 `~/.dsh/im/tool-groups.json`
 
-实测 16.6k → 3.4k token。装在 `~/.dsh/plugins/dsh-tool-gate`，配置在 `~/.dsh/im/tool-groups.json`，细节看那个目录的 README。
+装法看上游 README。上游 1.0.0 声明的运行时范围是 DSH 0.1.x；在 0.2.x 上装会被版本检查拦下，需要自行判断风险。
+
 
 ## 接话筛子与空转检查（0.11.6）
 
@@ -181,7 +182,7 @@ node tools/11-rag/rag.mjs stat     # 索引里有多少块
 
 ## 语音：让它说、也听你说（0.7.0 新增）
 
-自带一个 `tools/10-voice/voice.py`，两条路：
+自带一个 `tools/10-voice/voice.py`（**米萨写的**，原作者文件名为 `misa-voice.py`），两条路：
 
 **说**（耳机出声）
 
