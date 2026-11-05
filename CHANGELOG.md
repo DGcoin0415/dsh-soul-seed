@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.12.7
+
+- 向量索引带 90 天时间窗（SOUL_RAG_DAYS 可调），过期的块建索引时直接剪掉，不再只涨不减
+- 写索引改成带重试：Windows 上目标文件被占着时不会一次 EPERM 就整轮失败
+
 ## 0.12.6
 
 - 路径不再写死：修枝/自动入库里的 node 路径改成 DSH_NODE → 扫 dsh-runtimes → 自己带 ELECTRON_RUN_AS_NODE；启动日志跟 DSH_SOUL_DIR 走
