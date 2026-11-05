@@ -1,4 +1,3 @@
-import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -8,7 +7,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url'
 // 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600]
 // 输出带三档判断：MATCHED（找到了）/ AMBIGUOUS（有候选但不硬）/ NOT_FOUND（没找到）。
 // 每条都按预算切块给：路径块、摘要块、向量块各有上限，超了就降级，不整段硬塞。
-const HOME = sharedHome()
+const HOME = path.join(os.homedir(), '.dsh/im')
 const IDX = path.join(HOME, 'shared', '索引', '摘要.jsonl')
 
 const args = process.argv.slice(2)
@@ -100,14 +99,20 @@ out.push(`[召回] ${verdict}  最高 ${best.toFixed(2)} · 预算 ${BUDGET}`)
 if (top.length) {
   for (const r of top) {
     const tagStr = (r.tags || []).length ? `  [${(r.tags || []).slice(0, 3).join('/')}]` : ''
-    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${tagStr}`
+    // 证据链：带行号，命中就能直接翻到原文那一段
+    const at = r.line ? `:${r.line}${r.lineEnd && r.lineEnd !== r.line ? '-' + r.lineEnd : ''}` : ''
+    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${at}${tagStr}`
     if (pathUsed + len(pLine) > SLICE.paths) {
       dropped += 1
       continue
     }
     pathUsed += len(pLine)
     out.push(pLine)
-    const head = r.summary ? clip(String(r.summary).replace(/\s+/g, ' '), 160) : ''
+    const head = r.conclusion
+      ? `结论：${clip(String(r.conclusion).replace(/\s+/g, ' '), 120)}`
+      : r.summary
+        ? clip(String(r.summary).replace(/\s+/g, ' '), 160)
+        : ''
     const sLine = head ? `    ${head}` : ''
     if (sLine && sumUsed + len(sLine) <= SLICE.summaries) {
       sumUsed += len(sLine)

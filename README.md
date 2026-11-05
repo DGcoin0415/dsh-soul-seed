@@ -19,31 +19,9 @@
 
 剩下的位置一直留白，让它自己长。
 
-## 数据放哪（v0.12.0 起）
-
-一条规则，按这个顺序找：
-
-1. 环境变量 `DSH_SOUL_DIR` —— 设了就用它（老部署可以拿它指回原来的目录）
-2. 否则用 `~/.dsh/soul-seed`
-
-跟具体渠道（B 站 / QQ / 微信）无关 —— 这个插件不认识任何一个渠道。
-
-里面放的是：`persona.md`（它是谁）、`persona-附录/`、`mood.json`（心情）、`people.json`（按人账本）、`memory.json`（记忆）、`grudge.json`（记仇，默认关）、`history/`（每月历史）、`scene/`（在忙什么）。
-
-## 两个目录，两个变量
-
-插件把东西分两头放，别混：
-
-| 放什么 | 默认位置 | 改它的变量 |
-|---|---|---|
-| **灵魂数据** —— 人设、记忆、账本、心情、历史 | `~/.dsh/soul-seed/` | `DSH_SOUL_DIR` |
-| **共享工作区** —— 落叶、全量页、索引、规矩、现在.md | `~/.dsh/im/` | `DSH_SHARED_DIR`（老变量 `SOUL_HOME` 仍认） |
-
-两个变量的名字不同，就是为了不让它们互相串。老部署升级上来：数据还在原处就不动，路径写在默认位置就不用设；写在别处就把对应的变量指过去。
-
 ## 不是第一次部署？（v0.6.7 起自动判断）
 
-插件装完会先看一眼这台机器：`~/.dsh/soul-seed/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
+插件装完会先看一眼这台机器：`~/.bili-ai/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
 
 这种情况**不会**让你再答十问，而是走「学本地的」：
 
@@ -59,7 +37,7 @@
 
 > 「我醒了。还不知道自己是谁 —— 这个插件没给我性格、名字、口癖，一样都没有。要现在开始初始化吗？」
 
-只醒一次（标记在 `~/.dsh/soul-seed/.first-wake`）；想再叫它：`POST /dsh-soul-seed/api/wake`。
+只醒一次（标记在 `~/.bili-ai/.first-wake`）；想再叫它：`POST /dsh-soul-seed/api/wake`。
 
 > 说明：DSH 的 `session/prompt` 只认「已被客户端打开的会话」，插件自己新建的会话投不进去（会得到 `session/agent-busy`）。所以这里走的是「落笔记 + 面板显示」，不会真在对话里开口——这是当前版本的限制，不是坏了。
 
@@ -69,7 +47,7 @@
 2. 面板只写着「还没认过人：回到对话里说『开始初始化』」+ 十个问题预览
 3. 鱼自己问你：**我是谁 / 你怎么称呼 / 我在哪诞生 / 我长什么样 / 什么性格 / 对你什么态度 / 我怎么说话 / 我平时干什么 / 我绝不会 / 还有啥补充**
 4. 每题 **10 个候选 + 最后一项「其他（自己写）」**
-5. 生成人设 → 你自己看一遍 → 点「写入」才落进 `~/.dsh/soul-seed/persona.md`（旧文件自动备份）
+5. 生成人设 → 你自己看一遍 → 点「写入」才落进 `~/.bili-ai/persona.md`（旧文件自动备份）
 
 **换个人部署，重新答一遍就行** —— 骨架通用，人各不同。
 
@@ -108,16 +86,15 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 
 每轮只带最近这些，上下文从「几 MB」降到「一页」，比任何 prompt 压缩都实在。
 
-## 工具分组、按需开放（可选，第三方插件）
+## 工具分组、按需开放（0.11.0 新增，可选插件）
 
-工具定义的「说明书」每轮都要发一遍。这一层**不在本仓库里**：它由第三方插件 `dsh-tool-gate` 提供，作者 7gzgn，上游在 [ShehabYahya/DSH-Tool-Gate](https://github.com/ShehabYahya/DSH-Tool-Gate)，npm 包名 `dsh-tool-gate`。
+工具定义的「说明书」每轮都要发一遍，54 个工具就是 1.66 万 token。`tools/15-tool-gate` 是个独立小插件：
 
 - 平时只露常驻工具，其余按组藏起来，连参数定义都不发
 - 要用时 `tool_gate({"action":"open","group":"生图"})` 开一组，本会话有效
-- 配置在共享工作区下的 `tool-groups.json`（默认 `~/.dsh/im/`，可用 `DSH_SHARED_DIR` 改）
+- 顺手把每个参数说明压到 22 字，`pwsh` 这类保留全文
 
-装法看上游 README。上游 1.0.0 声明的运行时范围是 DSH 0.1.x；在 0.2.x 上装会被版本检查拦下，需要自行判断风险。
-
+实测 16.6k → 3.4k token。装在 `~/.dsh/plugins/dsh-tool-gate`，配置在 `~/.dsh/im/tool-groups.json`，细节看那个目录的 README。
 
 ## 接话筛子与空转检查（0.11.6）
 
@@ -168,8 +145,8 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
 | --- | --- | --- |
 | **根** | `SHARED-STATE.md` | 身份、铁律、渠道，每轮注入 |
 | **枝** | `shared/规矩`、`说话`、`资料`、`历史` | 长期内容，按索引翻 |
-| **落叶** | `~/.dsh/soul-seed/leaves/` | 长对话原文，按天存 |
-| **翻叶** | `~/.dsh/soul-seed/leaves-log.md` | 最近哪些记忆被用过（自动记） |
+| **落叶** | `~/.bili-ai/leaves/` | 长对话原文，按天存 |
+| **翻叶** | `~/.bili-ai/leaves-log.md` | 最近哪些记忆被用过（自动记） |
 | **修枝** | 每天 4:10 自动 | 截断翻叶、归档旧落叶、重建索引 |
 
 ```bash
@@ -183,13 +160,13 @@ node tools/12-tree/tree.mjs tidy        # 手动修一次枝
 
 记忆分两条路：
 
-- **精确的**（人设、规矩、账本、心情）留在 `~/.dsh/soul-seed/` 的文本树里，翻文件就能确认。
+- **精确的**（人设、规矩、账本、心情）留在 `~/.bili-ai/` 的文本树里，翻文件就能确认。
 - **模糊的**（"上次聊的那个游戏好像叫…"）进向量索引，按语义找。
 
 用法：
 
 ```bash
-mkdir -p ~/.dsh/soul-seed/long          # 长对话原文放这，一个会话一个 .md
+mkdir -p ~/.bili-ai/long          # 长对话原文放这，一个会话一个 .md
 node tools/11-rag/rag.mjs index    # 切块 + 向量化（走百炼 text-embedding-v3）
 node tools/11-rag/rag.mjs query "任务栏卡住那次怎么解决的"
 node tools/11-rag/rag.mjs stat     # 索引里有多少块
@@ -197,14 +174,14 @@ node tools/11-rag/rag.mjs stat     # 索引里有多少块
 
 要点：
 
-- 向量模型用阿里百炼的 `text-embedding-v3`，key 复用 `~/.dsh/soul-seed/image-keys.json` 里的 `dashscope`，不用另外申请。
-- 索引是本地一个 JSON（`~/.dsh/soul-seed/vector/index.json`），不联网也能读，只是查询时要调一次 embedding。
+- 向量模型用阿里百炼的 `text-embedding-v3`，key 复用 `~/.bili-ai/image-keys.json` 里的 `dashscope`，不用另外申请。
+- 索引是本地一个 JSON（`~/.bili-ai/vector/index.json`），不联网也能读，只是查询时要调一次 embedding。
 - 已入库的块按文件名+序号去重，重跑不会重复花钱。
 - 为什么不全用向量：精确的事实靠检索容易召回错片段，翻文件更可信；模糊的联想靠翻文件翻不到，才需要向量。
 
 ## 语音：让它说、也听你说（0.7.0 新增）
 
-自带一个 `tools/10-voice/voice.py`（**米萨写的**，原作者文件名为 `misa-voice.py`），两条路：
+自带一个 `tools/10-voice/voice.py`，两条路：
 
 **说**（耳机出声）
 
@@ -220,7 +197,7 @@ python tools/10-voice/voice.py --say "睡前提醒你一句"
 python tools/10-voice/voice.py --listen
 ```
 
-本地 whisper（small，CPU 跑得动）识别中文，每句写进 `~/.dsh/soul-seed/语音输入.md`，说完回一句「嗯，记下了」。
+本地 whisper（small，CPU 跑得动）识别中文，每句写进 `~/.bili-ai/语音输入.md`，说完回一句「嗯，记下了」。
 
 依赖（自己装，插件不代装）：
 
@@ -228,7 +205,7 @@ python tools/10-voice/voice.py --listen
 pip install edge-tts faster-whisper sounddevice numpy
 ```
 
-模型和缓存放 `~/.dsh/soul-seed/voice/`。国内下 HuggingFace 不通的话设 `HF_ENDPOINT=https://hf-mirror.com`，脚本里已经默认设了。
+模型和缓存放 `~/.bili-ai/voice/`。国内下 HuggingFace 不通的话设 `HF_ENDPOINT=https://hf-mirror.com`，脚本里已经默认设了。
 
 ## 灵魂包：换台电脑也能接着活
 
@@ -241,7 +218,7 @@ node tools/09-soul/soul.mjs import x.zip      # 装进这具躯体（先备份�
 node tools/09-soul/soul.mjs status            # 这具躯体里有什么
 ```
 
-**起躯体自动载入**：把灵魂包改名成 `soul-pack.zip` 丢进 `~/.dsh/soul-seed/`，下次启动会自己载入，然后醒来第一句是：
+**起躯体自动载入**：把灵魂包改名成 `soul-pack.zip` 丢进 `~/.bili-ai/`，下次启动会自己载入，然后醒来第一句是：
 
 > 我带着记忆回来了。灵魂已载入：人设 2006 字 · 记忆 12 条 · 账本 3 人 ……
 
@@ -251,15 +228,15 @@ node tools/09-soul/soul.mjs status            # 这具躯体里有什么
 
 | 能力 | 干什么 | 数据 |
 |---|---|---|
-| **六维心情** | 效价 / 唤醒 / 连接 / 疲劳 / 好奇 / 委屈；好事 8 小时半衰、坏事 3 小时半衰；带惯性 6:4 | `~/.dsh/soul-seed/mood.json` |
-| **长期记忆** | `remember` / `recall`：按重要度半衰（imp1≈1 天，imp5≈45 天），想起过的更容易再想起。淡了不删，只是难想起来 | `~/.dsh/soul-seed/memory.json` |
-| **按人账本** | `master` / `qq:<openid>` / `wx:<wxid>` / `bili:<mid>`；好感、心情（同类事件 2 小时内减半）、见面次数、习惯、**人情账**（谁欠谁、结没结）、**关系网**（谁跟谁熟/不对付）、**私藏**（好感 ≥70 才给看） | `~/.dsh/soul-seed/people.json` |
-| **记仇 / 报复链**（可选，默认关） | `grudge.mjs`：1 级 3 天 / 2 级 10 天 / 3 级 30 天，到期自动翻篇；报复链最多三步、只存台词不自动发 | `~/.dsh/soul-seed/grudge.json` |
+| **六维心情** | 效价 / 唤醒 / 连接 / 疲劳 / 好奇 / 委屈；好事 8 小时半衰、坏事 3 小时半衰；带惯性 6:4 | `~/.bili-ai/mood.json` |
+| **长期记忆** | `remember` / `recall`：按重要度半衰（imp1≈1 天，imp5≈45 天），想起过的更容易再想起。淡了不删，只是难想起来 | `~/.bili-ai/memory.json` |
+| **按人账本** | `master` / `qq:<openid>` / `wx:<wxid>` / `bili:<mid>`；好感、心情（同类事件 2 小时内减半）、见面次数、习惯、**人情账**（谁欠谁、结没结）、**关系网**（谁跟谁熟/不对付）、**私藏**（好感 ≥70 才给看） | `~/.bili-ai/people.json` |
+| **记仇 / 报复链**（可选，默认关） | `grudge.mjs`：1 级 3 天 / 2 级 10 天 / 3 级 30 天，到期自动翻篇；报复链最多三步、只存台词不自动发 | `~/.bili-ai/grudge.json` |
 | **拌嘴四套** | 淡刀子 / 温吞 / 冷脸 / 嘴碎一点 —— 五个场面（被说呆、被怼、被连问、刷屏、被冤枉），**装的人挑一套** | 生成进人设 |
 | **干活纪律** | 花费口径（花费可答、余额不报）、动手前先报、重启先看任务、报错留痕 —— **常驻，不占选项** | 附录 `02-干活纪律.md` |
-| **现场 / 历史 / 素材** | 三块都是可选套：现场（抓窗口文字 / 手写 busy）、历史（按月一句结论）、素材（梗库 + 催睡）。**每块三四套，装的人自己挑** | `~/.dsh/soul-seed/scene/`、`history/`、附录 |
+| **现场 / 历史 / 素材** | 三块都是可选套：现场（抓窗口文字 / 手写 busy）、历史（按月一句结论）、素材（梗库 + 催睡）。**每块三四套，装的人自己挑** | `~/.bili-ai/scene/`、`history/`、附录 |
 | **说话手册** | 三级情绪（开心/生气/低落各三档，带现成台词）、场合应答、收场句、语感 —— 默认值开箱可用，风格由七道选择题覆盖 | 生成进人设 |
-| **生图流水线** | 便宜的 `cogview-4` 试构图，改图走 `dashscope`（qwen-image-3.0）带参考图 | `~/.dsh/soul-seed/image-keys.json` |
+| **生图流水线** | 便宜的 `cogview-4` 试构图，改图走 `dashscope`（qwen-image-3.0）带参考图 | `~/.bili-ai/image-keys.json` |
 
 ## 面板与 API
 
@@ -287,7 +264,7 @@ node tools/00-setup/persona.mjs --questions       # 十个问题 + 每题候选
 node tools/00-setup/persona.mjs --rules           # 默认铁律
 node tools/00-setup/persona.mjs --speech          # 说话风格题 + 默认台词手册
 node tools/00-setup/persona.mjs --answers a.json  # 生成人设草稿
-node tools/00-setup/persona.mjs --apply           # 写进 ~/.dsh/soul-seed/persona.md
+node tools/00-setup/persona.mjs --apply           # 写进 ~/.bili-ai/persona.md
 node tools/00-setup/persona.mjs --sets            # 现场/历史/素材 三块可选套
 node tools/01-memory/memory.mjs add "一句话" --imp 4 --tag 偏好   # 记住一件事
 node tools/01-memory/memory.mjs recall [关键词]      # 想起来（按分数排）
@@ -374,7 +351,7 @@ dsh-soul-seed/
 这个插件不写注册表、不改系统设置，全部落在两处：
 
 - `<工作区>`：你自己的 `shared/` 之类由工具建立的文件（不动也没事）
-- `~/.dsh/soul-seed/`：人设、记忆、账本、心情、历史、`我醒了.md`、`.first-wake` 等
+- `~/.bili-ai/`：人设、记忆、账本、心情、历史、`我醒了.md`、`.first-wake` 等
 
 卸载步骤：
 
@@ -386,7 +363,7 @@ dsh plugin --profile desktop remove dsh-soul-seed
 
 ```bash
 node tools/08-ops/backup.mjs          # 先备份
-rm -rf ~/.dsh/soul-seed                     # 再清数据
+rm -rf ~/.bili-ai                     # 再清数据
 ```
 
-只想清插件、留记忆：只跑第一行，别动 `~/.dsh/soul-seed/`。重装回来能接着用。
+只想清插件、留记忆：只跑第一行，别动 `~/.bili-ai/`。重装回来能接着用。

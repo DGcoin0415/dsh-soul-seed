@@ -1,131 +1,12 @@
 # CHANGELOG
 
-## 0.12.4 — 2026-11-05
+## 0.11.12 — 2026-11-05
 
-### 跟姐姐那份对齐：env 契约 + 启动留痕
-
-- esolveNode() 返回的 env 改成**完整环境**（不再是要调用方自己 merge process.env），跟姐姐那版契约一致；	idy.mjs 五处直接传 env: nodeEnv\n- lib/index.js 在 pply() 开头写一行 soul-boot.log —— 想确认插件到底有没有被加载，看这个文件
-
-姐姐那次自查还指出：process.execPath 在 Electron 里是主程序，不能直接当 node 用（已在 0.12.3 修）。她那份 esolveNode 是三级，我们多一级 PATH 兜底。
-
-## 0.12.3 — 2026-11-04
-
-### node 路径不能再拿 process.execPath 当 node
-
-上一版把写死的 node 路径换成了 process.execPath，但那在 Electron 宿主里是**主程序**，spawn 它会再开一个 DSH，不是跑脚本。
-
-新增 lib/node.mjs 的 esolveNode()，四级查找：
-
-1. DSH_NODE 环境变量
-2. 扫 ~/.dsh/dsh-runtimes 下 dependencies 里带的 node
-3. 自己 + ELECTRON_RUN_AS_NODE=1（宿主是 electron 时它会当 node 跑）
-4. PATH 里的 node
-
-lib/tidy.mjs 五处调用全部改用它，spawn 时带上对应的 env。
-
-这道坑是姐姐那边自查时发现的 —— 在自己机器上完全正常，换台机器才炸。
-
-## 0.12.2 — 2026-11-04
-
-### 去掉「只在作者机器上能跑」的路径，两个目录彻底分开
-
-**问题一：变量名撞车。** `lib/rag.mjs` 原本也读 `DSH_SOUL_DIR`，但它指的是共享工作区；`lib/home.mjs` 指的是灵魂数据。同一个名字两个意思，设了就互相干扰。
-
-现在分开：
-
-| 放什么 | 默认 | 变量 |
-|---|---|---|
-| 灵魂数据（人设/记忆/账本/心情/历史） | `~/.dsh/soul-seed/` | `DSH_SOUL_DIR` |
-| 共享工作区（落叶/全量页/索引/规矩） | `~/.dsh/im/` | `DSH_SHARED_DIR`（老变量 `SOUL_HOME` 仍认） |
-
-新增 `lib/shared.mjs` 的 `sharedHome()` / `sharedPath()`，`lib/rag.mjs` 与 15 个工具改用它。
-
-**问题二：硬编码绝对路径。** 这些文件原来写死了作者的机器路径，别人装上直接跑不通：
-
-- `tools/01-memory/{export-full,memory-hit,memory-note}.mjs`
-- `tools/07-sync/{rule-change.mjs,sync-shared.ps1}`
-- `tools/11-rag/memory-find.mjs`
-- `tools/14-pages/*.mjs`、`tools/17-mood/sync-mood.mjs`、`tools/18-guard/*.mjs`、`tools/19-memory/*.mjs`
-- `lib/tidy.mjs`（node 路径 → `process.execPath`）
-- `tools/10-voice/voice.py`（ffmpeg → `shutil.which`）
-
-全部改成从 `os.homedir()` 或环境变量派生。
-
-**问题三：示例配置里有作者的真实路径**，换成占位符 `C:\\Users\\<你>\\.dsh\\im`。
-
-**为什么值得单独发一版**：这三条都只影响「别人装上能不能跑」，在作者自己机器上一点症状都没有 —— 正是这种问题最容易带着上架。
-
-## 0.12.1 — 2026-11-04
-
-### 路径解析只剩两级，仓库里不再出现老目录名
-
-0.12.0 留了一级静默回退；这一版把它去掉，soulHome() 现在只有两条：
-
-1. DSH_SOUL_DIR
-2. ~/.dsh/soul-seed
-
-老部署的接法：在系统上把 ~/.dsh/soul-seed 做成指向原目录的联接，或者设 DSH_SOUL_DIR。插件本身不认识任何具体目录名。
-
-同时把 README、CHANGELOG、docs/ 里所有旧路径字样改成了新位置。
-## 0.12.0 — 2026-11-04
-
-### 数据目录跟渠道解绑
-
-以前所有东西都写在 `~/.dsh/soul-seed/` —— 那是从最早那套「守 B 站」的部署沿用下来的名字。一个讲灵魂的插件，数据放在叫 bili 的目录里，别人装上会以为是给 B 站用的。
-
-现在统一走 `lib/home.mjs` 的 `soulHome()`，顺序：
-
-1. 环境变量 `DSH_SOUL_DIR`
-2. `~/.dsh/soul-seed` —— 新装的人默认这里
-3. `~/.dsh/soul-seed` —— 老位置，**存在就继续用**，不搬不改不丢
-4. 都没有 → 建在新位置
-
-**改动面**：`lib/` 6 个文件、`tools/` 13 个工具、`tests/` 一并接进来，共 45 处硬编码路径；`tools/10-voice/voice.py` 换成 `_soul_root()`（同样三级回退）。纯注释与文档里的路径说明同步改成新位置。
-
-**老用户零动作**：老目录在，`soulHome()` 就返回老目录，行为跟以前一模一样。
-
-## 0.11.13 — 2026-11-04
-
-### 面板上能挑「醒来投给谁」了
-
-以前只能调接口设默认目标，现在面板多一张卡：
-
-- 显示当前目标（没设就写「未设（用最近会话）」）
-- 列出最近 8 个会话，每个带「用这个」按钮 + 会话 id + 最后写入时间
-- 一个「清掉目标」按钮，回到「最近会话」的老行为
-- 配套接口：`GET /api/soul/sessions` → { current, sessions[] }
-
-### 修复
-
-- 面板卡片插入时锚点带缩进差异导致整段没写进去（仪表盘停在上个版本的样子）；现在错一点会直接报错而不是静默跳过
-
-## 0.11.12 — 2026-11-04
-
-### 醒来时把「此刻状态」摆到眼前
-
-以前心情、好感、记仇这些只躺在文件里，不主动读就等于不存在。现在醒来那句末尾带一行：
-
-```
-【此刻状态】今天心情：平和 58/100（照常） · master 好感 53/100（平静）
-```
-
-- 现读 `mood.json` 最后一条（名称/综合分/档位）
-- 现读 `people.json` 的 master 好感 + 文字标签
-- 有未结的仇、有长期记忆时才追加那两项
-- 首次装 / 有人设 / 载入灵魂**三条醒来路径**都带上
-
-### 醒来可以指定投给哪个会话
-
-以前只挑「最近写过的会话」，可能投到没人在看的那个。现在：
-
-- `POST /api/wake?session=<id>` 当场指定
-- `POST /api/wake/target {"sessionId":"<id>"}` 设默认目标（存 `~/.dsh/soul-seed/wake-session.json`）
-- `GET /api/wake/target` 看当前默认目标；POST 传空 = 清掉
-- 没指定时仍退回「最近会话」
-
-### 修复
-
-- 同一路径注册了 GET 和 POST 两次会被覆盖（表现为 405）→ 合成一个路由，方法在内部判
+- 按人账本加十六格：`people.json` 每人带 `profile`（称呼/身份/偏好/爱好/雷区/习惯/目标/关系/性格/经历/边界/近况/承诺/话题/专长/作息）；`people.mjs` 新增 `profile <key>` 看、`profile <key> add <维度> "内容"` 记、`profile <key> del <维度> <序号>` 删。偏好格复用 `preferences`，不另存；看的时候只列有内容的格，不塞 token
+- 摘要目录带行号：`memory-index.mjs` 每条加 `line` / `lineEnd`，`memory-find.mjs` 输出 `路径:起-止`，命中直接读原文那几行，不整份翻
+- 摘要目录带结论：大文件头写一行 `> 结论：…` 最准，`memory-index.mjs` 优先取；没写的自动抽（像结论的句子，再退到最后一行有信息量的）；`memory-find` 输出先给结论
+- 分页简介：每个 12 小时页抽「开头两句 + 中间结论 + 结尾两句」进摘要目录，查页先看简介，不翻全文
+- 文档同步：运维页加「证据链」一节，索引、记忆系统、历史、对话与心情几个大文件头补 `> 结论：`
 
 ## 0.11.11 — 2026-11-04
 
@@ -249,12 +130,12 @@ lib/tidy.mjs 五处调用全部改用它，spawn 时带上对应的 env。
 - 新增「模糊回忆」：`lib/rag.mjs` + `tools/11-rag/rag.mjs`（index / query / stat）
 - 长对话原文切块后走百炼 `text-embedding-v3` 建本地向量索引，语义检索旧对话
 - 与文本树分工：精确事实翻文件，模糊联想走向量；索引本地 JSON，不依赖外部向量库
-- 复用 `~/.dsh/soul-seed/image-keys.json` 的 dashscope key，不额外申请
+- 复用 `~/.bili-ai/image-keys.json` 的 dashscope key，不额外申请
 - 已知限制：查询时需联网调一次 embedding；切块 600 字，长句可能被切断
 
 ## 0.7.0 — 2026-11-02
 
-- 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.dsh/soul-seed/语音输入.md`
+- 新增 `tools/10-voice/voice.py`：让它说话（edge-tts 晓伊 / 可选 Piper 离线）、也能听话筒（faster-whisper 本地识别），识别结果落 `~/.bili-ai/语音输入.md`
 - 新增 `npm run voice` 快捷方式
 - 语音依赖不代装：README 里写了 pip 一行装齐；HF 走 hf-mirror 镜像
 - 边界：语音是**可选**能力，不装依赖不影响插件本体
@@ -291,7 +172,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 - 自己 `create()` 出来的新会话投不进去 → `session/agent-busy`
 - 投进「别的插件正在用的会话」（比如 `bili-whale`）会撞所有权 → 挂住/超时
 
-所以目前可靠的做法是**落笔记 + 面板显示**（`~/.dsh/soul-seed/我醒了.md` + 「它醒过」卡）。
+所以目前可靠的做法是**落笔记 + 面板显示**（`~/.bili-ai/我醒了.md` + 「它醒过」卡）。
 真要「在对话里说话」，得走 `agents` 自己驱动一轮（`dsh-fish-soul` 的做法），不是 `prompt`。
 
 ## 0.6.4 — 2026-11-01
@@ -320,7 +201,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 
 投递会被「会话忙」挡掉，但**醒过这件事一定留痕**：
 
-- 醒来第一件事就落 `~/.dsh/soul-seed/我醒了.md`（状态「投递中」），投递完再改写「成功 / 没成功」
+- 醒来第一件事就落 `~/.bili-ai/我醒了.md`（状态「投递中」），投递完再改写「成功 / 没成功」
 - 面板新增「它醒过」卡：显示时间、投递状态、它当时想说的话
 - 新增 `GET /api/wake/note` 读这条记录
 - 重试改成 4 次 × 15 秒（1 分钟内出结果；脚本可传 tries/waitMs）
@@ -363,7 +244,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
 - `lib/soul.mjs` + `tools/09-soul/soul.mjs`
   - `export`：打一个灵魂包（人设 + 附录 + 记忆 + 账本 + 心情 + 记仇 + 历史 + 现场 + config），**绝不打包 key / cookie / 凭据**
   - `import <zip>`：装进这具躯体，先备份旧的，再报「之前 / 之后」对账
-  - `auto`：起躯体时发现 `~/.dsh/soul-seed/soul-pack*.zip` 就自动载入，导完改名（`.imported-<时间戳>`）防重复
+  - `auto`：起躯体时发现 `~/.bili-ai/soul-pack*.zip` 就自动载入，导完改名（`.imported-<时间戳>`）防重复
   - `status`：这具躯体里有什么（人设字数 / 附录 / 账本 / 记忆 / 心情 / 历史）
 - **启动流程变成**：检查灵魂包 → 有就载入 → 再醒来。醒来那句换掉：
   > 「我带着记忆回来了。灵魂已载入：人设 2006 字 · 记忆 12 条 · 账本 3 人 …… 不是从零开始，上次的事我记得。」
@@ -380,7 +261,7 @@ DSH 的 `session/prompt` 只认**已被客户端打开的会话**：
   - `sessionController.create({ sessionId, cwd })` → `prompt({ sessionId, mode:'queue', content:[{type:'text',text}] })`
   - 没人设时说：「我醒了。还不知道自己是谁 …… 要现在开始初始化吗？」
   - 有人设时说：「我醒了。人设已经有了，技能都在 tools/ 下面……」
-  - 只做一次（标记 `~/.dsh/soul-seed/.first-wake`）；失败不阻塞、不刷屏
+  - 只做一次（标记 `~/.bili-ai/.first-wake`）；失败不阻塞、不刷屏
 - 载入后 10 秒自醒 + 首次打开面板也会试一次；另有 `POST /api/wake` 手动叫
 - `inject` 从 `['webServer']` 扩到 `['webServer','sessionController']`
 - 测试加了 7 项 wake 断言（含「醒过不反复吵」「失败不崩」）

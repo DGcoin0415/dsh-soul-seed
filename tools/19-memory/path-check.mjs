@@ -5,7 +5,7 @@ import path from 'node:path'
 // 指针体检：把每轮都注入的那两页里反引号包着的路径挨个走一遍，走不通的报出来。
 // 用法：node path-check.mjs [--quiet]
 // 只读不写，不花钱；挂进每日修枝。
-const IM = sharedHome()
+const IM = path.join(os.homedir(), '.dsh/im')
 const FILES = ['SHARED-STATE.md', 'AGENTS.md']
 const SKIP = ['://', 'github.com', 'node ', 'git ', 'npm ', 'pnpm ', '--', '\\', '<', '>', '|', 'YYYY', 'XX', 'qq-pending-check']
 

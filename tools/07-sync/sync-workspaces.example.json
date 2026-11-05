@@ -1,8 +1,8 @@
 {
-    "workspaces": [
-        "C:\\\\Users\\\\<你>\\\\.dsh\\\\im",
-        "D:\\\\另一个工作区"
-    ],
-    "version": 1,
-    "note": "新躯体接到哪就加到这里，同步脚本会一起扫。路径换成你自己的。"
+    "workspaces":  [
+                       "C:\\Users\\you\\.dsh\\im",
+                       "D:\\your-workspace"
+                   ],
+    "version":  1,
+    "note":  "鏂拌函浣撴帴鍒板摢灏卞姞鍒拌繖閲岋紝鍚屾鑴氭湰浼氫竴璧锋壂"
 }

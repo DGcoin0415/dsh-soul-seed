@@ -1,4 +1,3 @@
-import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -7,7 +6,7 @@ import { writeFileRetry } from './write-retry.mjs'
 // 把「现在」那页里能自动的两块刷一遍：手头没完的（从任务表）、跟人（从账本）。
 // 「在干什么」和心情各有各的写法：前者手写，后者 sync-mood 管。
 // 用法：node now-update.mjs [--dry]
-const IM = sharedHome()
+const IM = path.join(os.homedir(), '.dsh/im')
 const NOW = path.join(IM, 'shared/现在.md')
 const TASKS = path.join(IM, 'shared/任务.md')
 const PEOPLE = path.join(IM, 'shared/people/people.json')

@@ -1,4 +1,3 @@
-import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -7,7 +6,7 @@ import { writeFileRetry } from './write-retry.mjs'
 // 给共享树编一份「摘要目录」：文件一行 + 每个小节一行，查东西先看它，不用一上来读全文。
 // 每条还带 4 个标签（从标题里切，本地做，不调模型不花钱），检索时能先按标签筛。
 // 用法：node memory-index.mjs
-const HOME = sharedHome()
+const HOME = path.join(os.homedir(), '.dsh/im')
 const SHARED = path.join(HOME, 'shared')
 const OUT = path.join(SHARED, '索引', '摘要.jsonl')
 
@@ -17,6 +16,17 @@ function firstLine(text) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
   const body = lines.find((l) => !l.startsWith('#') && !l.startsWith('>') && !l.startsWith('|') && !l.startsWith('-'))
   return (body || lines.find((l) => !l.startsWith('#')) || '').replace(/[`*|]/g, '').slice(0, 90)
+}
+
+// 结论：优先文件头手写的「> 结论：…」，没有就从正文里抽（先找像结论的句子，再退到最后一行有信息量的）
+function conclusionOf(text) {
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
+  const explicit = lines.find((l) => /^(>?\s*)?(结论|一句话|摘要)\s*[:：]/.test(l))
+  if (explicit) return explicit.replace(/^(>?\s*)?(结论|一句话|摘要)\s*[:：]\s*/, '').replace(/[`*]/g, '').slice(0, 90)
+  const hit = [...lines].reverse().find((l) => /定了|改成|所以|结论|就这样|办完|已推/.test(l) && l.length > 12)
+  if (hit) return hit.replace(/^[-*>]\s*/, '').replace(/[`*]/g, '').slice(0, 90)
+  const last = [...lines].reverse().find((l) => l.length > 12 && !l.startsWith('#') && !l.startsWith('|') && !l.startsWith('>'))
+  return last ? last.replace(/^[-*>]\s*/, '').replace(/[`*]/g, '').slice(0, 90) : ''
 }
 
 function walk(dir, out = []) {
@@ -37,15 +47,20 @@ for (const f of walk(SHARED)) {
   const text = fs.readFileSync(f, 'utf8')
   const rel = path.relative(SHARED, f).replace(/\\/g, '/')
   const mtime = fs.statSync(f).mtimeMs
+  const totalLines = text.split('\n').length
   const secHeads = [...text.matchAll(/^##\s+(.+)$/gm)]
+  const lineOf = (idx) => text.slice(0, idx).split('\n').length
 
   rows.push({
     path: `shared/${rel}`,
     name: path.basename(f),
     summary: firstLine(text),
+    conclusion: conclusionOf(text),
     heads: secHeads.map((m) => m[1].trim()).slice(0, 12),
     size: text.length,
     mtime,
+    line: 1,
+    lineEnd: totalLines,
   })
 
   // 按小节再拆一层：查「工具分组」这种词，能直接落到文件里的那一节
@@ -59,9 +74,12 @@ for (const f of walk(SHARED)) {
       path: `shared/${rel}#${m[1].trim()}`,
       name: path.basename(f),
       summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`,
+      conclusion: conclusionOf(body),
       heads: [m[1].trim()],
       size: body.length,
       mtime,
+      line: lineOf(m.index),
+      lineEnd: lineOf(end),
     })
   })
 }
@@ -71,22 +89,33 @@ for (const extra of ['AGENTS.md', 'SHARED-STATE.md']) {
   const full = path.join(HOME, extra)
   if (!fs.existsSync(full)) continue
   const text = fs.readFileSync(full, 'utf8')
+  const totalLines = text.split('\n').length
   const secHeads = [...text.matchAll(/^##\s+(.+)$/gm)]
-  rows.push({ path: extra, name: extra, summary: firstLine(text), heads: secHeads.map((m) => m[1].trim()).slice(0, 12), size: text.length, mtime: fs.statSync(full).mtimeMs })
+  const lineOf = (idx) => text.slice(0, idx).split('\n').length
+  rows.push({ path: extra, name: extra, summary: firstLine(text), conclusion: conclusionOf(text), heads: secHeads.map((m) => m[1].trim()).slice(0, 12), size: text.length, mtime: fs.statSync(full).mtimeMs, line: 1, lineEnd: totalLines })
   secHeads.forEach((m, i) => {
     const start = m.index + m[0].length
     const end = i + 1 < secHeads.length ? secHeads[i + 1].index : text.length
     const body = text.slice(start, end).trim()
     if (body.length < 40) return
     const line = body.split('\n').map((l) => l.trim()).find((l) => l && !l.startsWith('|') && !l.startsWith('>')) || ''
-    rows.push({ path: `${extra}#${m[1].trim()}`, name: extra, summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`, heads: [m[1].trim()], size: body.length, mtime: fs.statSync(full).mtimeMs })
+    rows.push({ path: `${extra}#${m[1].trim()}`, name: extra, summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`, conclusion: conclusionOf(body), heads: [m[1].trim()], size: body.length, mtime: fs.statSync(full).mtimeMs, line: lineOf(m.index), lineEnd: lineOf(end) })
   })
 }
 for (const jf of fs.readdirSync(SHARED).filter((x) => x.endsWith('.json'))) {
   const full = path.join(SHARED, jf)
   rows.push({ path: `shared/${jf}`, name: jf, summary: `配置文件：${jf}`, heads: [], size: fs.statSync(full).size, mtime: fs.statSync(full).mtimeMs })
 }
-// 分页也编进去，但每条只留一句提示（页本身很大，读全文另走）
+// 分页也编进去：每页抽一条简介（开头两句 + 中间结论 + 结尾两句），查的时候先看简介，不用翻全文
+function pageDigest(text) {
+  const lines = text.split('\n').filter((l) => /^- \[/.test(l))
+  if (!lines.length) return ''
+  const pick = (l) => l.replace(/^- /, '').replace(/\s+/g, ' ').slice(0, 60)
+  const head = lines.slice(0, 2).map(pick)
+  const tail = lines.length > 2 ? lines.slice(-2).map(pick) : []
+  const mid = lines.slice(2, -2).filter((l) => /结论|好了|定了|改好|弄好|说定|就这样|办完/.test(l)).slice(-1).map(pick)
+  return [...head, ...mid, ...tail].join(' → ')
+}
 const pagesDir = path.join(SHARED, '全量', '页')
 if (fs.existsSync(pagesDir)) {
   for (const f of fs.readdirSync(pagesDir).filter((x) => /^\d{4}-\d{2}-\d{2}-(AM|PM)\.md$/.test(x))) {
@@ -96,10 +125,12 @@ if (fs.existsSync(pagesDir)) {
     rows.push({
       path: `shared/全量/页/${f}`,
       name: f,
-      summary: first.replace(/^-\s*/, '').slice(0, 90),
+      summary: pageDigest(text) || first.replace(/^-\s*/, '').slice(0, 90),
       heads: [],
       size: text.length,
       mtime: fs.statSync(full).mtimeMs,
+      line: 1,
+      lineEnd: text.split('\n').length,
     })
   }
 }

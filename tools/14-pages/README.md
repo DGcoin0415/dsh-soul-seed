@@ -13,7 +13,7 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的「接续」页
 
 | 变量 | 默认 | 说明 |
 | --- | --- | --- |
-| `DSH_SHARED_DIR` | `~/.dsh/im` | 灵魂工作区，页写进 `shared/全量/页/` |
+| `SOUL_HOME` | `~/.dsh/im` | 灵魂工作区，页写进 `shared/全量/页/` |
 | `SOUL_SESSIONS` | `~/.dsh/sessions` | DSH 会话目录，`-archive` 会一起扫 |
 
 ## 产出
