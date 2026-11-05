@@ -33,6 +33,17 @@ if (!query && !TAG) {
 const len = (s) => [...String(s)].length
 const clip = (s, n) => (len(s) > n ? [...s].slice(0, n).join('') + '…' : s)
 
+// 距今多久：模型不会自己按时间戳算，这里直接给成「3天前」这种说法
+const age = (ms) => {
+  if (!ms) return ''
+  const d = Math.floor((Date.now() - Number(ms)) / 86400000)
+  if (d <= 0) return '今天'
+  if (d === 1) return '昨天'
+  if (d < 30) return `${d}天前`
+  if (d < 365) return `${Math.floor(d / 30)}个月前`
+  return `${Math.floor(d / 365)}年前`
+}
+
 const tok = (s) => {
   const t = String(s).toLowerCase()
   const out = new Set()
@@ -101,7 +112,8 @@ if (top.length) {
     const tagStr = (r.tags || []).length ? `  [${(r.tags || []).slice(0, 3).join('/')}]` : ''
     // 证据链：带行号，命中就能直接翻到原文那一段
     const at = r.line ? `:${r.line}${r.lineEnd && r.lineEnd !== r.line ? '-' + r.lineEnd : ''}` : ''
-    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${at}${tagStr}`
+    const ago = age(r.mtime)
+    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${at}${tagStr}${ago ? '  ·' + ago : ''}`
     if (pathUsed + len(pLine) > SLICE.paths) {
       dropped += 1
       continue

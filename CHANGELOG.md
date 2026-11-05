@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.12.6
+
+- 路径不再写死：修枝/自动入库里的 node 路径改成 DSH_NODE → 扫 dsh-runtimes → 自己带 ELECTRON_RUN_AS_NODE；启动日志跟 DSH_SOUL_DIR 走
+- 叫醒防刷：标记 10 分钟过期、投不进去只试 3 次就丢
+- 落叶可停写：放 `shared/.no-落叶` 就不再追加长文（和 12 小时分页重复）
+- memory-find 输出带「距今 N 天」，模型不用自己按时间戳推
+- sync-shared 从 USERPROFILE 推路径，node 自动发现，换机器不用改
+
 ## 0.12.5 — 2026-11-05
 
 - 版本号跟米芾那条线对齐（她 0.12.4，这边接 0.12.5），以后两边同号走；lib 那批改动（`lib/node.mjs` 的 DSH_NODE 解析、`soul-boot.log`）仓库里本来就有
