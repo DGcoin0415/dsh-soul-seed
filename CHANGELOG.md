@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## 0.11.12 — 2026-11-05
+## 0.12.5 — 2026-11-05
 
+- 版本号跟米芾那条线对齐（她 0.12.4，这边接 0.12.5），以后两边同号走；lib 那批改动（`lib/node.mjs` 的 DSH_NODE 解析、`soul-boot.log`）仓库里本来就有
 - 按人账本加十六格：`people.json` 每人带 `profile`（称呼/身份/偏好/爱好/雷区/习惯/目标/关系/性格/经历/边界/近况/承诺/话题/专长/作息）；`people.mjs` 新增 `profile <key>` 看、`profile <key> add <维度> "内容"` 记、`profile <key> del <维度> <序号>` 删。偏好格复用 `preferences`，不另存；看的时候只列有内容的格，不塞 token
 - 摘要目录带行号：`memory-index.mjs` 每条加 `line` / `lineEnd`，`memory-find.mjs` 输出 `路径:起-止`，命中直接读原文那几行，不整份翻
 - 摘要目录带结论：大文件头写一行 `> 结论：…` 最准，`memory-index.mjs` 优先取；没写的自动抽（像结论的句子，再退到最后一行有信息量的）；`memory-find` 输出先给结论
