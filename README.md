@@ -74,6 +74,7 @@ node tools/13-model-check/model-check.mjs --base https://xxx/v1 --key sk-xxx --m
 ```bash
 node tools/14-pages/page-archive.mjs     # 把历史按 12 小时切页，增量
 node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
+node tools/14-pages/live-feed.mjs        # 实时：新消息按 2 小时一页切（0.12.8 新增）
 ```
 
 产出在 `shared/全量/页/`：`索引.md` 是目录，每页带一句「那会儿在说啥」；`shared/接续.md` 是最近 12 小时（多个会话合并，按字数封顶）。
@@ -283,6 +284,7 @@ node tools/02-people/people.mjs mood master --delta 6 --kind praise --why "他�
 node tools/06-image/gen-image.mjs --prompt "..." --provider zhipu --model cogview-4 --size 1024x1280
 node tools/14-pages/page-archive.mjs                 # 历史按 12 小时切页（增量）
 node tools/14-pages/compact-session.mjs              # 刷新最近 12 小时接续页
+node tools/14-pages/live-feed.mjs                    # 实时新消息按 2 小时一页切
 ```
 
 ## 心情怎么用
