@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.12.9
+
+- 新增 `tools/07-sync/bom-check.mjs`：扫 `~/.dsh` 查多余 BOM（JSON/JS/YAML 不能带）和含中文 ps1 缺 BOM，`--fix` 自动修；扫描根可用 `DSH_BOM_ROOT` 覆盖
+- 补全暂存里缺的 5 个老文件（`01-memory/export-full|memory-hit|memory-note`、`07-sync/rule-change|shared-lock`），跟仓库现有版本对齐，下次推不会漏
+
 ## 0.12.8
 
 - 新增 `tools/14-pages/live-feed.mjs`：各会话新消息按 2 小时一页切到 `shared/实时/MM-DD-HH.md`，`实时.md` 只镜像当前段，超过两天的段直接清
