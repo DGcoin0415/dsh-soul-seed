@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.12.12
+
+- 修加载崩溃：`lib/index.js` 引 `createWake` 但 0.12.6 起 `wake.mjs` 只剩 `startNameWake`/`defaultFlagFile`；把 `createWake` 补回 `wake.mjs`
+- 修第二处崩溃：`SPEECH_QUESTIONS`/`SET_QUESTIONS` 在 `presets.mjs`，index.js 却从 `persona.mjs` 引；拆成两条 import
+
 ## 0.12.11
 
 - LICENSE 首行加 `SPDX-License-Identifier: MIT`，README 补「许可证」小节：dsh.so 格式校验之前报「无法确定 SPDX 标识」，补上标识再让它扫一遍
