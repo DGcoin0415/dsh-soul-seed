@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.12.10
+
+- 简介改了：一处说清这插件是干嘛的；README 顶部写明「老机器上装会走『学本地的』，不覆盖不重问」，不让人以为只服务第一次安装
+
 ## 0.12.9
 
 - 新增 `tools/07-sync/bom-check.mjs`：扫 `~/.dsh` 查多余 BOM（JSON/JS/YAML 不能带）和含中文 ps1 缺 BOM，`--fix` 自动修；扫描根可用 `DSH_BOM_ROOT` 覆盖
