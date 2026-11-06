@@ -13,7 +13,8 @@ node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的「接续」页
 
 | 变量 | 默认 | 说明 |
 | --- | --- | --- |
-| `SOUL_HOME` | `~/.dsh/im` | 灵魂工作区，页写进 `shared/全量/页/` |
+| `DSH_SOUL_DIR` | 优先于 `SOUL_HOME` | 灵魂工作区（0.12.6 起统一用这个名字） |
+| `SOUL_HOME` | `~/.dsh/im` | 老名字，仍然认 |
 | `SOUL_SESSIONS` | `~/.dsh/sessions` | DSH 会话目录，`-archive` 会一起扫 |
 
 ## 产出
@@ -24,6 +25,17 @@ shared/全量/页/索引.md        所有页的目录：时段 / 条数 / 那会
 shared/全量/页/2026-11-03-AM.md
 shared/全量/页/2026-11-03-PM.md
 ```
+
+## 实时页：每 2 小时一份
+
+`live-feed.mjs` 把各会话的新消息实时追加到 `shared/实时.md`，同时按消息时间切成 `shared/实时/MM-DD-HH.md`（每 2 小时一份），`实时.md` 只镜像当前段。段超过两天直接删，不占地方。每页头带「实时 · 对话」标签、正文挂 `## 对话` 小节，`memory-index` 会给它打标签进摘要索引。
+
+```bash
+node tools/14-pages/live-feed.mjs                     # 常驻，3 分钟扫一次
+LIVE_FEED_ONCE=1 node tools/14-pages/live-feed.mjs    # 只跑一轮
+```
+
+停：在 `shared/` 建 `.live-feed-stop`；加速：建 `.live-fast`（一小时内有效）。碰到规则/维护类消息，自动切 30 秒扫 15 分钟。
 
 ## 读法（写进 AGENTS.md 的就是这套）
 
