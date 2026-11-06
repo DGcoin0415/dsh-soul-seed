@@ -21,6 +21,10 @@
 
 剩下的位置一直留白，让它自己长。
 
+## 许可证
+
+MIT，见仓库根的 [LICENSE](./LICENSE)。
+
 ## 不是第一次部署？（v0.6.7 起自动判断）
 
 插件装完会先看一眼这台机器：`~/.bili-ai/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。

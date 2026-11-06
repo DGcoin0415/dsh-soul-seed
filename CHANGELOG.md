@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.12.11
+
+- LICENSE 首行加 `SPDX-License-Identifier: MIT`，README 补「许可证」小节：dsh.so 格式校验之前报「无法确定 SPDX 标识」，补上标识再让它扫一遍
+
 ## 0.12.10
 
 - 简介改了：一处说清这插件是干嘛的；README 顶部写明「老机器上装会走『学本地的』，不覆盖不重问」，不让人以为只服务第一次安装
