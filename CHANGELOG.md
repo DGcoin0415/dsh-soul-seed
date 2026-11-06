@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.12.14 — 2026-11-06
+
+- 修 `lib/wake.mjs` 里 `MARKER` 未定义：补回常量，唤醒流程能跑
+- 恢复 `tools/02-people/people.mjs` 原版接口（show/meet/secret/grudge 那套），十六格 `profile` 并进去（`profile <id>` 看、`--add` 记、`--del` 删），不再覆盖旧命令
+- 测试全绿（1 个测试文件 0 失败）
+
 ## 0.12.13 — 2026-11-06
 
 - 新增 `docs/固定轨道.md`：把试错试出来的操作路线写成站点式（起点 → 途经站 → 终点｜走错退回），照着走不重复摸
