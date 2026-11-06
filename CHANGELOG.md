@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.12.13 — 2026-11-06
+
+- 新增 `docs/固定轨道.md`：把试错试出来的操作路线写成站点式（起点 → 途经站 → 终点｜走错退回），照着走不重复摸
+
 ## 0.12.12
 
 - 修加载崩溃：`lib/index.js` 引 `createWake` 但 0.12.6 起 `wake.mjs` 只剩 `startNameWake`/`defaultFlagFile`；把 `createWake` 补回 `wake.mjs`
