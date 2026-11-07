@@ -112,7 +112,7 @@ for (const file of sessions()) {
     let text = ''
     if (d.type === 'user/message') {
       text = textOf(d.data?.content).trim()
-      role = 'master'
+      role = '用户'
     } else if (d.type === 'assistant/message') {
       text = textOf(d.data?.message?.content).trim()
       role = '米萨'
