@@ -1,6 +1,6 @@
 {
   "name": "dsh-soul-seed",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "一枚灵魂的种子：记忆存本机文件、按人记账、情绪有半衰期。新机器答十问，已有人设和记忆的老机器自动走「学本地的」，不覆盖。",
   "keywords": [
     "dsh",
@@ -78,6 +78,7 @@
     "should-reply": "node tools/18-guard/should-reply.mjs",
     "stall": "node tools/18-guard/stall-check.mjs",
     "doctor": "node tools/00-install/doctor.mjs",
-    "publish": "node tools/08-ops/publish.mjs"
+    "publish": "node tools/08-ops/publish.mjs",
+    "memory:export": "node tools/01-memory/export-full.mjs"
   }
 }
