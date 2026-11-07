@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -7,10 +8,26 @@ import { pathToFileURL, fileURLToPath } from 'node:url'
 // 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600]
 // 输出带三档判断：MATCHED（找到了）/ AMBIGUOUS（有候选但不硬）/ NOT_FOUND（没找到）。
 // 每条都按预算切块给：路径块、摘要块、向量块各有上限，超了就降级，不整段硬塞。
-const HOME = path.join(os.homedir(), '.dsh/im')
+const HOME = sharedHome()
 const IDX = path.join(HOME, 'shared', '索引', '摘要.jsonl')
 
 const args = process.argv.slice(2)
+// 建索引 / 看索引：原来独立的 rag.mjs 并进来了
+//   node memory-find.mjs index
+//   node memory-find.mjs stat
+if (args[0] === 'index' || args[0] === 'stat') {
+  const { buildIndex, loadIndex, longDir, indexDir } = await import('../../lib/rag.mjs')
+  if (args[0] === 'index') {
+    const r = await buildIndex({ log: (m) => console.log(' ' + m) })
+    console.log(`完成：共 ${r.total} 块，新增 ${r.added} 块`)
+  } else {
+    const idx = loadIndex()
+    console.log(`索引：${idx.chunks.length} 块 · ${idx.model} · 建于 ${idx.builtAt || '未建'}`)
+    console.log(`原文目录：${longDir()}`)
+    console.log(`索引文件：${path.join(indexDir(), 'index.json')}`)
+  }
+  process.exit(0)
+}
 const useRag = args.includes('--rag')
 const topI = args.indexOf('--top')
 const TOP = topI >= 0 ? Number(args[topI + 1]) : 3
