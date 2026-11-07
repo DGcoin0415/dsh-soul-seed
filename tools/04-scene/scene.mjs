@@ -2,7 +2,7 @@
 import { soulHome } from '../../lib/home.mjs'
 // scene.mjs —— 现场：把「现在什么心情 / 在忙什么」落到文件里
 //
-//   node tools/04-scene/scene.mjs busy "在给 master 传 GitHub 仓库"
+//   node tools/04-scene/scene.mjs busy "在给 用户 传 GitHub 仓库"
 //   node tools/04-scene/scene.mjs chat "<别人说的最后一句>"
 //   node tools/04-scene/scene.mjs show
 //
