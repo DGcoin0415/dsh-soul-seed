@@ -4,7 +4,7 @@ import { soulHome } from '../../lib/home.mjs'
 //
 // 每人：好感 / 心情 / 见面次数 / 事件 / 习惯 / 人情账 / 私藏
 // 全局：关系网（谁跟谁熟、谁跟谁不对付）
-// id 约定：master / qq:<openid> / wx:<wxid> / bili:<mid>
+// id 约定：用户 / qq:<openid> / wx:<wxid> / bili:<mid>
 //
 //   node people.mjs show [id]
 //   node people.mjs meet <id>
@@ -94,7 +94,7 @@ function ensure(db, id) {
   if (!db.people[id]) {
     db.people[id] = {
       id,
-      nickname: id === "master" ? "master" : id,
+      nickname: id === "用户" ? "用户" : id,
       goodwill: 50, mood: 50, meets: 0,
       firstAt: ISO(), lastAt: ISO(),
       habits: [], events: [], favors: [], secrets: []
@@ -172,7 +172,7 @@ if (cmd === "show" || cmd === "list") {
     console.log(fmt(p, db));
   } else {
     const all = Object.values(db.people);
-    if (!all.length) console.log("账本还空着（node people.mjs meet master）");
+    if (!all.length) console.log("账本还空着（node people.mjs meet 用户）");
     for (const p of all) console.log(fmt(p, db) + "\n");
   }
   save(db);
@@ -210,7 +210,7 @@ if (cmd === "show" || cmd === "list") {
 } else if (cmd === "habit") {
   const id = pos[0];
   const add = opt("add");
-  if (!id || !add) { console.error('用法：node people.mjs habit master --add "…"'); process.exit(2) }
+  if (!id || !add) { console.error('用法：node people.mjs habit 用户 --add "…"'); process.exit(2) }
   const p = ensure(db, id);
   p.habits = p.habits ?? [];
   if (!p.habits.includes(add)) p.habits.push(add);
@@ -260,7 +260,7 @@ if (cmd === "show" || cmd === "list") {
   if (sub === "add") {
     const what = opt("what");
     const dir = opt("dir", "in");
-    if (!id || !what) { console.error('用法：node people.mjs favors add master --dir in --what "…"'); process.exit(2) }
+    if (!id || !what) { console.error('用法：node people.mjs favors add 用户 --dir in --what "…"'); process.exit(2) }
     const p = ensure(db, id);
     p.favors.push({ at: ISO(), dir, what, settled: false });
     save(db);
@@ -287,7 +287,7 @@ if (cmd === "show" || cmd === "list") {
 } else if (cmd === "link") {
   const a = pos[0], b = pos[1];
   const kind = opt("kind", "熟");
-  if (!a || !b) { console.error('用法：node people.mjs link master qq:xxx --kind 熟 --note "…"'); process.exit(2) }
+  if (!a || !b) { console.error('用法：node people.mjs link 用户 qq:xxx --kind 熟 --note "…"'); process.exit(2) }
   ensure(db, a); ensure(db, b);
   const exists = db.links.find((l) => (l.a === a && l.b === b) || (l.a === b && l.b === a));
   if (exists) { exists.kind = kind; exists.note = opt("note", exists.note) }
