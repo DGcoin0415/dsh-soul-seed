@@ -9,7 +9,10 @@ import { fileURLToPath } from 'node:url'
 // 可选环境变量：SOUL_HOME（默认 ~/.dsh/im）
 const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
 const STATE = path.join(HOME, '.pages-schedule.json')
-const SCRIPTS = [path.join(HOME, 'page-archive.mjs'), path.join(HOME, 'compact-session.mjs')]
+const HERE = path.dirname(fileURLToPath(import.meta.url))
+const SCRIPTS = ['page-archive.mjs', 'compact-session.mjs']
+  .map((name) => [path.join(HOME, name), path.join(HERE, name)].find((p) => fs.existsSync(p)))
+  .filter(Boolean)
 
 // 最近一个该跑的时间点：今天 0:00 或 12:00
 export function latestBoundary(now = Date.now()) {
