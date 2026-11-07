@@ -27,7 +27,8 @@ function readStamp() {
 }
 
 function writeStamp(entry) {
-  const key = `${entry.mood?.composite}|${entry.mood?.name}|${entry.mood?.emotion?.label}`
+  const label = entry.mood?.name ?? entry.mood?.emotion?.label ?? entry.mood?.label ?? ''
+const key = `${entry.mood?.composite}|${label}`
   writeFileRetry(STAMP, JSON.stringify({ at: entry.at, key }))
 }
 
@@ -122,4 +123,4 @@ if (!process.argv.includes('--no-shared')) updateShared(fmt(entry))
 const nowOk = updateNow(entry)
 const cardOk = updateCard(entry)
 writeStamp(entry)
-console.log('synced', entry.mood?.name, entry.mood?.composite, cardOk ? '+card' : '', nowOk ? '+now' : '')
+console.log('synced', label || '?', (entry.mood?.composite ?? '?') + '/100', cardOk ? '+card' : '', nowOk ? '+now' : '')
