@@ -53,16 +53,16 @@ ok(Object.keys(allOn).length === 6, "五块全选 → 六份附录");
 ok(QUESTIONS.length >= 9 && SPEECH_QUESTIONS.length >= 7 && SET_QUESTIONS.length >= 5, "题量齐（10 基本 / 8 风格 / 5 可选）");
 
 // ═══════════ 二、账本 + 人情账 + 关系网 + 私藏 + 记仇 ═══════════
-await run("people", "meet", "master", "--why", "见了一面");
-let out = await run("people", "show", "master");
+await run("people", "meet", "用户", "--why", "见了一面");
+let out = await run("people", "show", "用户");
 ok(out.includes("见面 1 次"), "见面次数 +1");
-ok((await run("people", "favors", "add", "master", "--dir", "in", "--what", "帮我看代码")).includes("欠着"), "人情账记「欠着」");
-ok((await run("people", "link", "master", "qq:abc", "--kind", "熟")).includes("熟"), "关系网加边");
-ok((await run("people", "secret", "master", "--add", "他怕黑")).includes("私藏 +1"), "私藏能加");
-out = await run("people", "secret", "master");
+ok((await run("people", "favors", "add", "用户", "--dir", "in", "--what", "帮我看代码")).includes("欠着"), "人情账记「欠着」");
+ok((await run("people", "link", "用户", "qq:abc", "--kind", "熟")).includes("熟"), "关系网加边");
+ok((await run("people", "secret", "用户", "--add", "他怕黑")).includes("私藏 +1"), "私藏能加");
+out = await run("people", "secret", "用户");
 ok(!out.includes("他怕黑"), "好感 <70 时私藏不给看");
-await run("people", "bump", "master", "--delta", "25");
-ok((await run("people", "secret", "master")).includes("他怕黑"), "好感够了才显示");
+await run("people", "bump", "用户", "--delta", "25");
+ok((await run("people", "secret", "用户")).includes("他怕黑"), "好感够了才显示");
 
 out = await run("people", "grudge", "add", "qq:abc", "--what", "当众说我笨", "--level", "2");
 ok(out.includes("10 天后翻篇"), "记仇：2 级 10 天到期");
@@ -122,7 +122,7 @@ const { exportSoul, importSoul, autoImport, wasLoaded } = await import("file://"
 const bodyA = fs.mkdtempSync(path.join(os.tmpdir(), "soul-a-"));
 fs.mkdirSync(path.join(bodyA, "persona-附录"), { recursive: true });
 fs.writeFileSync(path.join(bodyA, "persona.md"), "# 我是谁\n\n我是小满。\n".repeat(10), "utf8");
-fs.writeFileSync(path.join(bodyA, "people.json"), JSON.stringify({ people: { master: { id: "master", goodwill: 70, mood: 60, meets: 2 } } }), "utf8");
+fs.writeFileSync(path.join(bodyA, "people.json"), JSON.stringify({ people: { 用户: { id: "用户", goodwill: 70, mood: 60, meets: 2 } } }), "utf8");
 fs.writeFileSync(path.join(bodyA, "credentials.json"), JSON.stringify({ SECRET: "不该进包" }), "utf8");
 const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "soul-out-"));
 const exp = exportSoul({ dataDir: bodyA, outDir });
