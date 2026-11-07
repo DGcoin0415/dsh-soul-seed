@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { writeFileRetry } from './write-retry.mjs'
 
-// 日档自动整理：从当天 12 小时页里挑 master 说的话，落成一份日档。
+// 日档自动整理：从当天 12 小时页里挑 用户 说的话，落成一份日档。
 // 用法：node memory-daily.mjs [--date 2026-11-03] [--force]
 // 不调模型、不花钱；只做筛选和截断，细节仍旧回当天全量页看。
 const IM = sharedHome()
@@ -76,7 +76,7 @@ for (const page of pages) {
     const m = /^- \[(\d{2}:\d{2})\] ([^：]{1,12})：(.*)$/.exec(raw)
     if (!m) continue
     const [, clock, who, rest] = m
-    if (!/master/i.test(who)) continue
+    if (!/用户/i.test(who)) continue
     if (NOISE.some((n) => rest.includes(n))) continue
     const text = clean(rest)
     if (text.length < 6) continue
@@ -101,7 +101,7 @@ fs.mkdirSync(DAY_DIR, { recursive: true })
 const body = [
   `# 日档 · ${target}`,
   '',
-  `> 自动整理：只摘 master 当天说的话，细节看 \`shared/全量/页/${target}-*.md\`。`,
+  `> 自动整理：只摘 用户 当天说的话，细节看 \`shared/全量/页/${target}-*.md\`。`,
   '',
   '## 当天提点',
   '',
