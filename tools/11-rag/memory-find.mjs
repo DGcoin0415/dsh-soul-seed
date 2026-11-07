@@ -3,9 +3,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { pathToFileURL, fileURLToPath } from 'node:url'
+import { pickSeedTerms } from '../../lib/hop.mjs'
 
 // 查记忆：先翻摘要目录（不花钱），翻不到再走向量。
-// 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600]
+// 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600] [--hop]（--hop：顺着命中再找一轮，适合「这件事我在哪几篇写过」）
 // 输出带三档判断：MATCHED（找到了）/ AMBIGUOUS（有候选但不硬）/ NOT_FOUND（没找到）。
 // 每条都按预算切块给：路径块、摘要块、向量块各有上限，超了就降级，不整段硬塞。
 const HOME = sharedHome()
@@ -155,7 +156,46 @@ if (verdict === 'NOT_FOUND') out.push('  摘要目录里没有。别硬编，加
 
 console.log(out.join('\n'))
 
-if (useRag) {
+// ── 顺藤：从命中的摘要里再抽词，检索第二轮（跟 SAG2 学的那一手）──
+//   找到一条不等于找全：同一件事常被切成好多段，靠第一轮的词捞不到全部。
+//   只顺一轮，不再往下钻；--no-hop 可关。
+if (verdict === 'MATCHED' && top.length && process.argv.includes('--hop')) {
+  const seeds = pickSeedTerms(
+    top.map((r) => [r.conclusion, r.summary, (r.heads || []).join(' ')].filter(Boolean).join(' ')),
+    [...qt],
+    { max: 4 }
+  )
+  if (seeds.length) {
+    const seenPaths = new Set(top.map((r) => r.path + (r.line || '')))
+    // 种子词要按查询同样的口径切（二元组 + 英文词），否则永远对不上文档的 token 集
+    const seedToks = [...new Set(seeds.flatMap((s) => [...tok(s)]))].filter((x) => !STOP.has(x))
+    const hopScored = rows
+      .map((r, i) => {
+        let hit = 0
+        let matched = 0
+        for (const s of seedToks) if (docs[i].has(s)) { hit += idf(s); matched += 1 }
+        return { ...r, score: hit / Math.max(1, Math.sqrt(seedToks.length)), matched }
+      })
+      // 双门槛：分数够 + 至少两个种子词同时命中。一个弱词蹭上来的不算顺藤。
+      .filter((r) => r.score >= 1.0 && r.matched >= Math.min(3, seedToks.length) && !seenPaths.has(r.path + (r.line || '')))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2)
+
+    if (hopScored.length) {
+      console.log(`[顺藤] 用「${seeds.join('、')}」再找一轮 → ${hopScored.length} 条`)
+      for (const r of hopScored) {
+        const at = r.line ? `:${r.line}${r.lineEnd && r.lineEnd !== r.line ? '-' + r.lineEnd : ''}` : ''
+        console.log(`- ${r.score.toFixed(2)}  ${r.path}${at}`)
+        const head = r.conclusion || r.summary
+        if (head) console.log('    ' + clip(String(head).replace(/\s+/g, ' '), 140))
+      }
+      console.log('  （顺着第一轮的关键词找到的，不是直接命中 —— 用之前对一眼原文）')
+    }
+  }
+}
+
+const autoRag = !useRag && verdict === 'NOT_FOUND' && !process.argv.includes('--no-rag')
+if (useRag || autoRag) {
   // 先找同目录的 rag.mjs（仓库里就是这样放着），没有再用插件里那份
   const here = path.dirname(fileURLToPath(import.meta.url))
   const ragPath = [
@@ -171,7 +211,7 @@ if (useRag) {
   const hits = (r.hits || []).filter((h) => Number(h.score) >= 0.35)
   const topScore = Number(hits[0]?.score || 0)
   const ragVerdict = topScore >= 0.62 ? 'MATCHED' : hits.length ? 'AMBIGUOUS' : 'NOT_FOUND'
-  console.log(`[向量兜底] ${ragVerdict}  最高 ${topScore.toFixed(2)}`)
+  console.log(`[向量兜底${autoRag ? '·自动' : ''}] ${ragVerdict}  最高 ${topScore.toFixed(2)}`)
   let vUsed = 0
   let vDropped = 0
   for (const h of hits) {
