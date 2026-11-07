@@ -77,7 +77,7 @@ for (const line of raw.split('\n')) {
   }
   if (d.type === 'user/message') {
     const t = textOf(d.data?.content).trim()
-    if (t && !t.startsWith('<')) rows.push({ ms: d.time, role: 'master', text: t })
+    if (t && !t.startsWith('<')) rows.push({ ms: d.time, role: '用户', text: t })
   } else if (d.type === 'assistant/message') {
     const t = textOf(d.data?.message?.content).trim()
     if (t) rows.push({ ms: d.time, role: '米萨', text: t })
@@ -89,7 +89,7 @@ const existing = new Map()
 for (const f of fs.readdirSync(OUT_DIR)) {
   if (!f.endsWith('.md')) continue
   const text = fs.readFileSync(path.join(OUT_DIR, f), 'utf8')
-  for (const m of text.matchAll(/^- \[(\d{2}:\d{2})\] (master|米萨)：/gm)) {
+  for (const m of text.matchAll(/^- \[(\d{2}:\d{2})\] (用户|米萨)：/gm)) {
     existing.set(f + '|' + m[1] + '|' + m[2], true)
   }
 }
