@@ -95,9 +95,11 @@ function channelMap() {
 
 function workspaceLabel(dirName) {
   const inner = dirName.replace(/^--|--$/g, '')
-  if (inner.includes('dsh-im')) return '面板'
-  if (inner.includes('whale-work')) return '终端'
-  if (inner.includes('weixin')) return '微信'
+  if (inner.includes('dsh-im') || inner.includes('dsh\im')) return '面板'
+  if (inner.includes('weixin') || inner.includes('wechat')) return '微信'
+  // 终端那台的工作区名因人而异，环境变量里配一份就行：LIVE_FEED_TERMINAL=你的工作区名
+  const terminal = (process.env.LIVE_FEED_TERMINAL || '').trim()
+  if (terminal && inner.includes(terminal)) return '终端'
   return '其他'
 }
 
@@ -201,7 +203,7 @@ function scan() {
       let text = ''
       if (d.type === 'user/message') {
         text = textOf(d.data?.content).trim()
-        role = 'master'
+        role = '用户'
       } else if (d.type === 'assistant/message') {
         text = textOf(d.data?.message?.content).trim()
         role = '米萨'
