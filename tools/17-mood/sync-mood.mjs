@@ -1,3 +1,4 @@
+import { sharedPath } from '../../lib/shared.mjs'
 import os from 'node:os'
 import path from 'node:path'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -7,10 +8,10 @@ import { writeFileRetry } from '../19-memory/write-retry.mjs'
 const NODE = path.join(os.homedir(), '.dsh/dsh-runtimes/dsh-primary-runtime/dependencies/node/bin/node.exe')
 const MOOD_DIR = path.join(os.homedir(), '.bili-ai')
 const MOOD_JSON = MOOD_DIR + '/mood.json'
-const SHARED = path.join(os.homedir(), '.dsh/im/shared/mood.md')
+const SHARED = sharedPath('shared', 'mood.md')
 const MARK = '## MOOD-AUTO 当前心情'
 
-const STAMP = path.join(os.homedir(), '.dsh/im/.mood-sync-stamp.json')
+const STAMP = sharedPath('.mood-sync-stamp.json')
 
 function runMood() {
   try {
@@ -86,7 +87,7 @@ function updateCard(entry) {
 
 // 顺手把「现在」那页的心情一行也刷了：新会话开局读它，别写成一成不变的心情
 function updateNow(entry) {
-  const nowFile = path.join(os.homedir(), '.dsh/im/shared/现在.md')
+  const nowFile = sharedPath('shared', '现在.md')
   if (!existsSync(nowFile)) return false
   try {
     const m = entry.mood || {}
