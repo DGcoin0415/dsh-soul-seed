@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 0.13.1 — 2026-11-07
+
+### 清理与合并：同一个功能只留一处
+
+盘了一遍工具目录，发现几组在干同一件事。这一版合并掉，**工具文件 40 → 35**，命令行入口 25 → 22，功能一条没少。
+
+| 合并 | 之前 | 之后 |
+| --- | --- | --- |
+| 唤醒 | `lib/wake.mjs`（352 行）+ `tools/16-name-wake/name-wake.mjs`（109 行），两个文件头一句一模一样 | 只留 `lib/wake.mjs` |
+| 记忆记账 | `memory-hit.mjs` 写 `命中.jsonl`、`lib/turnlog.mjs` 写 `翻叶.md`，两套账 | 统一走 turnlog，命中记进翻叶 |
+| 日档 | `memory-note.mjs`（手写）+ `memory-daily.mjs`（自动） | 合成一条：`memory-daily.mjs` 与 `memory-daily.mjs note` |
+| 检索入口 | `tools/11-rag/rag.mjs`（33 行薄壳）+ `memory-find.mjs` | `memory-find.mjs index\|stat` |
+| 四个体检 | `check` / `path-check` / `model-check` / `bom-check` 各一条命令 | `tools/00-install/doctor.mjs` 一个入口，四个子命令 |
+| 状态发布 | `sync-mood.mjs` + `now-update.mjs` 各跑一次 | `tools/08-ops/publish.mjs` 一个入口 |
+
+### 拔掉不该在灵魂里的东西
+
+- 删 `tools/08-ops/qq-uia-read.ps1`：读 QQ 窗口文字是**渠道**的事，灵魂插件不该认识 QQ（跟 0.12.0 删 `tool-gate` 同一类问题）
+- `presets.mjs` 与 `docs/初始化问答.md` 里对它的引用改成中性说法：需要应用自己开着无障碍树，读不到就退回截图
+
+### 顺手回填
+
+0.12.14 那版把我 0.12.2 的路径统一覆盖回去了（`~/.dsh/im` 又写死在 6 个文件里）。这一版重新接上 `sharedHome()` / `sharedPath()`，并检查全仓库没有机器专有路径。
+
 ## 0.13.0 — 2026-11-07
 
 ### 结论锚：工具跑完，把上一步的结论摆回来
