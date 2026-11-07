@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.13.2 — 2026-11-07
+
+### 体检发现的真问题：两个后台任务写了但没接
+
+跑了一遍完整性检查（scripts 指向的文件、相对 import、文档提到的路径、导出但没人调的函数），查出：
+
+- `lib/tidy.mjs` 的 `startDailyTidy` —— **定义了，没有任何地方调用**。修枝（每天 4 点、错过补跑）从来没跑过。
+- `lib/autoindex.mjs` 的 `startAutoIngest` —— 同样没人调用。自动入库（每 30 分钟增量建索引）从来没跑过。
+
+这一版把它们接到 `apply()` 里，跟面板注册一起进 disposers，插件卸载时会一起停。修枝的日志写 `soul-boot.log` 旁边的 `tidy.log`。
+
+顺带：
+
+- `tools/01-memory/export-full.mjs` 原来是孤岛（没 script、没文档引用），补上 `npm run memory:export`
+- 复查：**导出但没人调用的函数 0 个**
+
+遗留（不算破损，是历史记录）：CHANGELOG 里提到 `lib/pages.mjs` / `lib/speech.mjs` / `lib/sets.mjs` —— 这三个后来分别并进 `tools/14-pages/` 和 `lib/presets.mjs`，旧条目不改。
+
 ## 0.13.1 — 2026-11-07
 
 ### 清理与合并：同一个功能只留一处
