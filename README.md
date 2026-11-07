@@ -27,7 +27,7 @@ MIT，见仓库根的 [LICENSE](./LICENSE)。
 
 ## 不是第一次部署？（v0.6.7 起自动判断）
 
-插件装完会先看一眼这台机器：`~/.bili-ai/persona.md`、`memory.json`、`people.json`、`~/.dsh/im/SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
+插件装完会先看一眼这台机器：`~/.dsh/soul-seed/persona.md`、`memory.json`、`people.json`、共享工作区的 `SHARED-STATE.md`，有任何一个就当「已经有一只鱼了」。
 
 这种情况**不会**让你再答十问，而是走「学本地的」：
 
@@ -140,7 +140,7 @@ node tools/14-pages/live-feed.mjs        # 实时：新消息按 2 小时一页�
 
 ## 名字叫醒：卡住不许一直重试（0.11.3）
 
-群里有人喊名字时，往已经打开的会话里投一句（`tools/16-name-wake/`）。以前投不进去会反复重试，日志刷屏、消息堵住；现在三条：最多试 3 次、标记超过 10 分钟作废、投不进就丢掉标记。
+群里有人喊名字时，往已经打开的会话里投一句（实现在 `lib/wake.mjs`，插件内嵌，不再单独带脚本）。以前投不进去会反复重试，日志刷屏、消息堵住；现在三条：最多试 3 次、标记超过 10 分钟作废、投不进就丢掉标记。
 
 另外 `tools/07-sync/sync-shared.ps1` 修了一个坑：以前只同步主工作区，另一具躯体的工作区不在清单里，一直停在旧版本。现在清单在 `sync-workspaces.json` 里，加一行就多同步一个；`-Check` 一眼看谁落后，每次跑都写 `sync.log`。
 
@@ -174,9 +174,9 @@ node tools/12-tree/tree.mjs tidy        # 手动修一次枝
 
 ```bash
 mkdir -p ~/.bili-ai/long          # 长对话原文放这，一个会话一个 .md
-node tools/11-rag/rag.mjs index    # 切块 + 向量化（走百炼 text-embedding-v3）
-node tools/11-rag/rag.mjs query "任务栏卡住那次怎么解决的"
-node tools/11-rag/rag.mjs stat     # 索引里有多少块
+node tools/11-rag/memory-find.mjs index   # 切块 + 向量化（走百炼 text-embedding-v3）
+node tools/11-rag/memory-find.mjs "任务栏卡住那次怎么解决的"
+node tools/11-rag/memory-find.mjs stat    # 索引里有多少块
 ```
 
 要点：
@@ -281,6 +281,8 @@ node tools/02-people/people.mjs chain <人> --next    # 下一步台词（要人
 node tools/04-scene/scene.mjs status       # 运行状态一眼看
 node tools/04-scene/scene.mjs error "撞风控了"    # 报错留痕
 node tools/08-ops/backup.mjs                      # 一键备份成 zip
+node tools/00-install/doctor.mjs                    # 体检：装机 / 指针 / 模型 / BOM（可加参数只跑一项）
+node tools/08-ops/publish.mjs                       # 发布状态：心情 → shared/mood.md、现在 → shared/现在.md
 node tools/05-history/history.mjs add "一句结论"     # 记一条历史
 node tools/05-history/history.mjs index               # 生成本月索引 log.md
 node tools/04-scene/scene.mjs busy "在忙什么"      # 写现场
@@ -335,14 +337,14 @@ dsh-soul-seed/
 │   └── presets.mjs           说话手册（三级情绪/收场/拌嘴四套）+ 五块可选能力套
 │
 ├── tools/
-│   ├── 01-memory/  记忆      会淡忘的长期记忆（按重要度半衰）
+│   ├── 01-memory/  记忆      会淡忘的长期记忆（按重要度半衰）+ 命中记账
 │   ├── 02-people/  关系      账本：好感 / 人情账 / 关系网 / 私藏 / 记仇
 │   ├── 03-mood/    情绪      六维心情（半衰期 + 惯性）
 │   ├── 04-scene/   现场      在忙什么 + 运行状态 + 报错落盘
 │   ├── 05-history/ 历史      按月一句结论 + log.md 索引
 │   ├── 06-image/   出图      便宜的试构图（备胎，统一走 DSH 的 generate_image）
 │   ├── 07-sync/    同步      写锁 + 同步脚本（可选）
-│   └── 08-ops/     杂务      一键备份 / 抓窗口文字
+│   └── 08-ops/     杂务      一键备份 / 状态发布（publish）
 │
 ├── tests/                    一份测试跑完 29 项（临时 HOME，不碰真数据）
 ├── docs/                     初始化问答（23 问）· 生图经验
