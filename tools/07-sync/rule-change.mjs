@@ -6,7 +6,7 @@ import path from 'node:path'
 // 用法：
 //   node rule-change.mjs <文件> <主题> "<新内容>" [--why "为什么改"]
 // 例：
-//   node rule-change.mjs 情绪与说话.md "冷场" "冷场超过两分钟就自己找句话。" --why "master 说太冷了"
+//   node rule-change.mjs 情绪与说话.md "冷场" "冷场超过两分钟就自己找句话。" --why "用户 说太冷了"
 const RULES = sharedPath('shared', '规矩')
 const HIST = sharedPath('shared', '历史', '规矩变更.md')
 
