@@ -18,7 +18,7 @@ const get = (k) => {
 
 const DEFAULT = {
   // 这几个人什么时候都接
-  always: ['qq:1042442284', 'master'],
+  always: ['qq:1042442284', '用户'],
   // 这几个人直接不接
   never: [],
   // 安静时段不主动开口（白名单除外）
