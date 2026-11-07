@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -6,7 +7,7 @@ import { writeFileRetry } from './write-retry.mjs'
 // 给共享树编一份「摘要目录」：文件一行 + 每个小节一行，查东西先看它，不用一上来读全文。
 // 每条还带 4 个标签（从标题里切，本地做，不调模型不花钱），检索时能先按标签筛。
 // 用法：node memory-index.mjs
-const HOME = path.join(os.homedir(), '.dsh/im')
+const HOME = sharedHome()
 const SHARED = path.join(HOME, 'shared')
 const OUT = path.join(SHARED, '索引', '摘要.jsonl')
 
