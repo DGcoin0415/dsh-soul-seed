@@ -128,7 +128,7 @@ node tools/14-pages/live-feed.mjs        # 实时：新消息按 2 小时一页�
 
 ## 修枝补跑、日档与指针体检（0.11.9）**修枝补跑**：以前每天 4:10 到点才跑，机器没开着那趟就没了。现在记一个状态文件（`.tidy-schedule.json`），开机发现错过就跑，和 12 小时分页一个路子；跑没跑看 `wake.log` 里 `tidy:` 开头的行。
 
-**日档**（`tools/19-memory/memory-daily.mjs`）：把「昨天」master 说的话摘成 `shared/记忆本/日/YYYY-MM-DD.md`，当天已有手记就跳过、不覆盖。只做筛选和截断，不调模型、不花钱。
+**日档**（`tools/19-memory/memory-daily.mjs`）：把「昨天」你 说的话摘成 `shared/记忆本/日/YYYY-MM-DD.md`，当天已有手记就跳过、不覆盖。只做筛选和截断，不调模型、不花钱。
 
 **指针体检**（`tools/19-memory/path-check.mjs`）：根页和 AGENTS 里反引号写的路径挨个走一遍，走不通就列出来（退 1）。指针是「不搬原文、只留路径」，路径失效了还照指，就成误导；这个用来防它悄悄断开。
 
@@ -237,7 +237,7 @@ node tools/09-soul/soul.mjs status            # 这具躯体里有什么
 |---|---|---|
 | **六维心情** | 效价 / 唤醒 / 连接 / 疲劳 / 好奇 / 委屈；好事 8 小时半衰、坏事 3 小时半衰；带惯性 6:4 | `~/.bili-ai/mood.json` |
 | **长期记忆** | `remember` / `recall`：按重要度半衰（imp1≈1 天，imp5≈45 天），想起过的更容易再想起。淡了不删，只是难想起来 | `~/.bili-ai/memory.json` |
-| **按人账本** | `master` / `qq:<openid>` / `wx:<wxid>` / `bili:<mid>`；好感、心情（同类事件 2 小时内减半）、见面次数、习惯、**人情账**（谁欠谁、结没结）、**关系网**（谁跟谁熟/不对付）、**私藏**（好感 ≥70 才给看） | `~/.bili-ai/people.json` |
+| **按人账本** | `你` / `qq:<openid>` / `wx:<wxid>` / `bili:<mid>`；好感、心情（同类事件 2 小时内减半）、见面次数、习惯、**人情账**（谁欠谁、结没结）、**关系网**（谁跟谁熟/不对付）、**私藏**（好感 ≥70 才给看） | `~/.bili-ai/people.json` |
 | **记仇 / 报复链**（可选，默认关） | `grudge.mjs`：1 级 3 天 / 2 级 10 天 / 3 级 30 天，到期自动翻篇；报复链最多三步、只存台词不自动发 | `~/.bili-ai/grudge.json` |
 | **拌嘴四套** | 淡刀子 / 温吞 / 冷脸 / 嘴碎一点 —— 五个场面（被说呆、被怼、被连问、刷屏、被冤枉），**装的人挑一套** | 生成进人设 |
 | **干活纪律** | 花费口径（花费可答、余额不报）、动手前先报、重启先看任务、报错留痕 —— **常驻，不占选项** | 附录 `02-干活纪律.md` |
@@ -288,7 +288,7 @@ node tools/05-history/history.mjs index               # 生成本月索引 log.m
 node tools/04-scene/scene.mjs busy "在忙什么"      # 写现场
 node tools/04-scene/scene.mjs show                # 看现场 + 心情
 node tools/02-people/people.mjs show               # 看账本
-node tools/02-people/people.mjs mood master --delta 6 --kind praise --why "他夸我了"
+node tools/02-people/people.mjs mood 你 --delta 6 --kind praise --why "他夸我了"
 node tools/06-image/gen-image.mjs --prompt "..." --provider zhipu --model cogview-4 --size 1024x1280
 node tools/14-pages/page-archive.mjs                 # 历史按 12 小时切页（增量）
 node tools/14-pages/compact-session.mjs              # 刷新最近 12 小时接续页
