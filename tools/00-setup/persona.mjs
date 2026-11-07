@@ -10,7 +10,7 @@ import { soulHome } from '../../lib/home.mjs'
 //   node tools/00-setup/persona.mjs --show             看当前草稿 / 已写入的人设
 //
 // 答案 JSON 长这样：
-//   { "charName":"米芾", "userName":"master", "origin":"…", "look":"…",
+//   { "charName":"米芾", "userName":"用户", "origin":"…", "look":"…",
 //     "personality":"…", "attitude":"…", "speech":"…", "job":"…", "extra":"…",
 //     "rules":["…", "…"] }
 import fs from "node:fs";
