@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.13.3 — 2026-11-07
+
+### 心情同步的判重键不再带不存在的字段
+
+`sync-mood.mjs` 原来拿 `mood.composite | mood.name | mood.emotion.label` 当判重键；新数据里没有 `emotion.label`，于是每次打印 `58|平和|undefined`，读起来像出错（判定本身没错，`composite` 和 `name` 都在）。
+
+现在按「有哪个用哪个」取标签：`name → emotion.label → label`，打印成 `平和 58/100`。
+
 ## 0.13.2 — 2026-11-07
 
 ### 体检发现的真问题：两个后台任务写了但没接
