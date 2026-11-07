@@ -28,7 +28,7 @@ function readStamp() {
 
 function writeStamp(entry) {
   const label = entry.mood?.name ?? entry.mood?.emotion?.label ?? entry.mood?.label ?? ''
-const key = `${entry.mood?.composite}|${label}`
+  const key = `${entry.mood?.composite}|${label}`
   writeFileRetry(STAMP, JSON.stringify({ at: entry.at, key }))
 }
 
@@ -112,7 +112,8 @@ if (!entry) { console.log('no mood entry'); process.exit(1) }
 
 const stamp = readStamp()
 const force = process.argv.includes('--force')
-const key = `${entry.mood?.composite}|${entry.mood?.name}|${entry.mood?.emotion?.label}`
+const label = entry.mood?.name ?? entry.mood?.emotion?.label ?? entry.mood?.label ?? ''
+const key = `${entry.mood?.composite}|${label}`
 if (!force && stamp.key && stamp.key === key) {
   console.log('心情没变，跳过', key)
   process.exit(0)
