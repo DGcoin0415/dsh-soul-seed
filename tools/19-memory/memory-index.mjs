@@ -11,7 +11,7 @@ const HOME = sharedHome()
 const SHARED = path.join(HOME, 'shared')
 const OUT = path.join(SHARED, '索引', '摘要.jsonl')
 
-const SKIP_DIRS = new Set(['全量', '向量', '落叶', '旧', '索引', '凭据'])
+const SKIP_DIRS = new Set(['全量', '向量', '旧', '索引', '凭据', '日'])
 
 function firstLine(text) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
