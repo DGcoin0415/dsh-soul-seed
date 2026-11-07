@@ -2,7 +2,7 @@
 import { soulHome } from '../../lib/home.mjs'
 // memory.mjs —— 长期记忆：会淡忘，才记得住重要的
 //
-//   node memory.mjs add "master 说他不吃香菜" --imp 4 --tag 偏好
+//   node memory.mjs add "用户 说他不吃香菜" --imp 4 --tag 偏好
 //   node memory.mjs recall [关键词] [--n 10]
 //   node memory.mjs list
 //   node memory.mjs forget <id|关键词>
