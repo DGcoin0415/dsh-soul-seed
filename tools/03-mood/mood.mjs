@@ -5,7 +5,7 @@ import { soulHome } from '../../lib/home.mjs'
 // 六个维度（各 0-100）：
 //   valence     效价   今天好不好
 //   arousal     唤醒   动没动起来
-//   connection  连接   被不被看见（master 找过我几次 + 账本里的好感/心情）
+//   connection  连接   被不被看见（用户 找过我几次 + 账本里的好感/心情）
 //   fatigue     疲劳   累不累
 //   curiosity   好奇   今天有没有碰到新东西
 //   frustration 委屈   受挫感（失败返工、没人接话、被要求重做）
@@ -146,9 +146,9 @@ function events() {
   return { count, kinds, failures, talk, daysWithTalk, goodScore, badScore, newsCount: news.size };
 }
 
-function masterLedger() {
+function 用户Ledger() {
   const db = readJson(PEOPLE, { people: {} });
-  return db?.people?.master ?? null;
+  return db?.people?.用户 ?? null;
 }
 
 function quietDays(daysWithTalk) {
@@ -290,7 +290,7 @@ const s = sleep();
 const ev = events();
 const un = await unread();
 const st = streak();
-const ml = masterLedger();
+const ml = 用户Ledger();
 
 const raw = score(w, v, s, ev, un, st, ml);
 
