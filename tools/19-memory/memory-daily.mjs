@@ -1,3 +1,4 @@
+import { sharedHome } from '../../lib/shared.mjs'
 import os from 'node:os'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -6,7 +7,7 @@ import { writeFileRetry } from './write-retry.mjs'
 // 日档自动整理：从当天 12 小时页里挑 master 说的话，落成一份日档。
 // 用法：node memory-daily.mjs [--date 2026-11-03] [--force]
 // 不调模型、不花钱；只做筛选和截断，细节仍旧回当天全量页看。
-const IM = path.join(os.homedir(), '.dsh/im')
+const IM = sharedHome()
 const PAGE_DIR = path.join(IM, 'shared/全量/页')
 const DAY_DIR = path.join(IM, 'shared/记忆本/日')
 
@@ -16,6 +17,26 @@ const opt = (name) => {
   return i >= 0 ? args[i + 1] : undefined
 }
 const force = args.includes('--force')
+
+// 手动写日档（原来独立的 memory-note.mjs）：
+//   node memory-daily.mjs note "触点：…" "变：…" "回：…"
+if (args[0] === 'note') {
+  const body = args.slice(1).filter(Boolean)
+  if (body.length === 0) {
+    console.log('用法: node memory-daily.mjs note "触点：…" "变：…" "回：…"')
+    process.exit(1)
+  }
+  const now = new Date()
+  const p = (n) => String(n).padStart(2, '0')
+  const day = `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`
+  const clock = `${p(now.getHours())}:${p(now.getMinutes())}`
+  fs.mkdirSync(DAY_DIR, { recursive: true })
+  const file2 = path.join(DAY_DIR, day + '.md')
+  if (!fs.existsSync(file2)) fs.writeFileSync(file2, `# 日档 · ${day}\n\n`, 'utf8')
+  fs.appendFileSync(file2, `\n## ${clock}\n\n` + body.map((a) => `- ${a}`).join('\n') + '\n', 'utf8')
+  console.log(`写进 ${day}.md：${body.length} 行`)
+  process.exit(0)
+}
 
 const p2 = (n) => String(n).padStart(2, '0')
 const fmt = (d) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`
