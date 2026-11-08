@@ -6,7 +6,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url'
 import { pickSeedTerms } from '../../lib/hop.mjs'
 
 // 查记忆：先翻摘要目录（不花钱），翻不到再走向量。
-// 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600] [--hop]（--hop：顺着命中再找一轮，适合「这件事我在哪几篇写过」）
+// 用法：node memory-find.mjs "想问的事" [--rag] [--top 3] [--budget 1600] [--hop] [--at YYYY-MM-DD] [--between A..B]（--hop：顺着命中再找一轮，适合「这件事我在哪几篇写过」）
 // 输出带三档判断：MATCHED（找到了）/ AMBIGUOUS（有候选但不硬）/ NOT_FOUND（没找到）。
 // 每条都按预算切块给：路径块、摘要块、向量块各有上限，超了就降级，不整段硬塞。
 const HOME = sharedHome()
@@ -40,7 +40,21 @@ const TAG = tagI >= 0 ? String(args[tagI + 1] || '').toLowerCase() : ''
 // 三块配额：路径清单 1/4，摘要正文不到一半，向量兜底三成，谁也不能借谁的
 const SLICE = { paths: Math.round(BUDGET * 0.4), summaries: Math.round(BUDGET * 0.35), vectors: Math.round(BUDGET * 0.25) }
 
-const OMIT = new Set(['--top', '--budget', '--tag'])
+// 时间切：--at 只看那一刻之前的证据；--between 给区间
+//   node memory-find.mjs "想问的事" --at 2026-04-20
+//   node memory-find.mjs "想问的事" --between 2026-04-10..2026-04-20
+const atI = args.indexOf('--at')
+const AT = atI >= 0 ? Date.parse(args[atI + 1]) : NaN
+const betI = args.indexOf('--between')
+let BET = null
+if (betI >= 0 && typeof args[betI + 1] === 'string' && args[betI + 1].includes('..')) {
+  const [a, b] = args[betI + 1].split('..')
+  const from = Date.parse(a)
+  const to = Date.parse(b) + 86400000
+  if (Number.isFinite(from) && Number.isFinite(to)) BET = [from, to]
+}
+
+const OMIT = new Set(['--top', '--budget', '--tag', '--at', '--between'])
 const query = args.filter((a, i) => !a.startsWith('--') && !OMIT.has(args[i - 1])).join(' ').trim()
 
 if (!query && !TAG) {
@@ -71,12 +85,21 @@ const tok = (s) => {
   return out
 }
 
+const inWindow = (ms) => {
+  if (!Number.isFinite(AT) && !BET) return true
+  if (!ms) return false
+  if (Number.isFinite(AT) && ms > AT) return false
+  if (BET && (ms < BET[0] || ms > BET[1])) return false
+  return true
+}
+
 const rows = fs.existsSync(IDX)
   ? fs.readFileSync(IDX, 'utf8')
   .split('\n')
   .filter(Boolean)
   .map((l) => JSON.parse(l))
   .filter((r) => !TAG || (r.tags || []).some((t) => String(t).toLowerCase().includes(TAG)))
+  .filter((r) => inWindow(r.mtime))
   : []
 
 // 只给标签、没给问题：按标签列最近的条目，不打分
@@ -155,13 +178,16 @@ let pathUsed = 0
 let sumUsed = 0
 let dropped = 0
 
-out.push(`[召回] ${verdict}  最高 ${best.toFixed(2)} · 预算 ${BUDGET}`)
+const winDesc = Number.isFinite(AT)
+  ? '· 只看 ' + new Date(AT).toISOString().slice(0, 10) + ' 之前'
+  : BET ? '· 区间 ' + new Date(BET[0]).toISOString().slice(0, 10) + ' ~ ' + new Date(BET[1] - 86400000).toISOString().slice(0, 10) : ''
+out.push(`[召回] ${verdict}  最高 ${best.toFixed(2)} · 预算 ${BUDGET} ${winDesc}`)
 if (top.length) {
   for (const r of top) {
     const tagStr = (r.tags || []).length ? `  [${(r.tags || []).slice(0, 3).join('/')}]` : ''
     // 证据链：带行号，命中就能直接翻到原文那一段
     const at = r.line ? `:${r.line}${r.lineEnd && r.lineEnd !== r.line ? '-' + r.lineEnd : ''}` : ''
-    const ago = age(r.mtime)
+    const ago = age(r.mtime) + (r.mtime ? '（' + new Date(r.mtime).toISOString().slice(0, 10) + '）' : '')
     const pLine = `- ${r.score.toFixed(2)}  ${r.path}${at}${tagStr}${ago ? '  ·' + ago : ''}`
     if (pathUsed + len(pLine) > SLICE.paths) {
       dropped += 1
