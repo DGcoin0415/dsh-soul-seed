@@ -71,12 +71,13 @@ const tok = (s) => {
   return out
 }
 
-const rows = fs
-  .readFileSync(IDX, 'utf8')
+const rows = fs.existsSync(IDX)
+  ? fs.readFileSync(IDX, 'utf8')
   .split('\n')
   .filter(Boolean)
   .map((l) => JSON.parse(l))
   .filter((r) => !TAG || (r.tags || []).some((t) => String(t).toLowerCase().includes(TAG)))
+  : []
 
 // 只给标签、没给问题：按标签列最近的条目，不打分
 if (!query && TAG) {
@@ -86,8 +87,38 @@ if (!query && TAG) {
   process.exit(0)
 }
 
+// 问法扩展：同一个事实换个问法（「全名」问、历史里写的是「我叫 X」）
+const QUERY_EXPAND = new Map([
+  ['全名', ['名字', '叫', '称呼', '姓名']],
+  ['名字', ['全名', '叫', '称呼']],
+  ['多大', ['岁', '年龄', '年纪']],
+  ['年龄', ['岁', '多大', '年纪']],
+  ['生日', ['月', '日', '过生', '出生']],
+  ['住哪', ['住', '区', '地址', '合租']],
+  ['做什么', ['工作', '职业', '上班', '客服']],
+  ['欠', ['还', '欠着', '剩', '记着']],
+  ['答应', ['说好', '约定', '算一个']],
+  ['矛盾', ['对不上', '前后', '改口', '说过']],
+  ['对不上', ['矛盾', '前后', '改口']],
+])
+
+// 这些词出现时说明要「把散落的几处拼起来」，召回要给多一点
+const NEEDS_MORE = /矛盾|对不上|前后|改口|理一下|整理|汇总|都有哪些|几件|哪些事|回忆/
+const NEEDS_MORE_TOP = 8
+
 const STOP = new Set(['怎么', '什么', '在哪', '那个', '一下', '这个', '为啥', '哪里', '多少', '可以', '是不是'])
-const qt = [...tok(query)].filter((t) => !STOP.has(t))
+const baseQt = [...tok(query)].filter((t) => !STOP.has(t))
+const expandQuery = (tokens) => {
+  const out = new Set(tokens)
+  for (const tk of tokens) {
+    const extra = QUERY_EXPAND.get(tk)
+    if (extra) for (const e of extra) out.add(e)
+  }
+  return [...out]
+}
+const qt = expandQuery(baseQt)
+const wantMore = NEEDS_MORE.test(query)
+const TOP_USE = wantMore ? Math.max(TOP, NEEDS_MORE_TOP) : TOP
 const df = new Map()
 const docs = rows.map((r) => tok(`${r.path} ${r.name} ${r.summary} ${(r.heads || []).join(' ')} ${(r.tags || []).join(' ')}`))
 for (const d of docs) for (const t of d) df.set(t, (df.get(t) || 0) + 1)
@@ -112,7 +143,7 @@ const scored = pool
   .filter((r) => r.score > 0.05) // 0 分的噪声不往外打，这是老毛病
   .sort((a, b) => b.score - a.score)
 
-const top = scored.slice(0, TOP)
+const top = scored.slice(0, TOP_USE)
 const best = top[0]?.score || 0
 const bestCover = top[0]?.cover || 0
 // 分数够 + 覆盖率过半，才算「真找到」；只蹭上一个词最多算候选
@@ -151,8 +182,8 @@ if (top.length) {
   }
 }
 if (dropped) out.push(`  （预算紧，${dropped} 条没展开）`)
-if (verdict === 'AMBIGUOUS') out.push('  候选而已，没到「就是这条」的程度；答之前先问一句或读原文核对。')
-if (verdict === 'NOT_FOUND') out.push('  摘要目录里没有。别硬编，加 --rag 再走一次向量。')
+if (verdict === 'AMBIGUOUS') out.push('  候选而已，没到「就是这条」的程度：读原文核对；核对不了就说「我没记清」，别猜。')
+if (verdict === 'NOT_FOUND') out.push('  摘要目录里没有。别硬编 —— 答「这条我没记着」比编一个强。')
 
 console.log(out.join('\n'))
 
@@ -196,18 +227,23 @@ if (verdict === 'MATCHED' && top.length && process.argv.includes('--hop')) {
 
 const autoRag = !useRag && verdict === 'NOT_FOUND' && !process.argv.includes('--no-rag')
 if (useRag || autoRag) {
-  // 先找同目录的 rag.mjs（仓库里就是这样放着），没有再用插件里那份
-  const here = path.dirname(fileURLToPath(import.meta.url))
-  const ragPath = [
-    path.join(here, 'rag.mjs'),
-    path.join(os.homedir(), '.dsh/plugins/dsh-misa-soul/lib/rag.mjs'),
-  ].find((p) => fs.existsSync(p))
-  if (!ragPath) {
-    console.log('[向量兜底] 找不到 rag.mjs，跳过')
+  // 直接用插件里的 lib/rag.mjs（0.13.x 起 tools/11-rag/rag.mjs 已经并进来了）
+  let recall = null
+  try {
+    ;({ recall } = await import('../../lib/rag.mjs'))
+  } catch (e) {
+    console.log('[向量兜底] 载入失败，跳过：' + String(e?.message ?? e).slice(0, 80))
     process.exit(0)
   }
-  const { recall } = await import(pathToFileURL(ragPath).href)
-  const r = await recall(query, TOP)
+  let r
+  try {
+    r = await recall(query, TOP_USE)
+  } catch (e) {
+    const msg = String(e?.message ?? e)
+    console.log('[向量兜底] 用不了：' + msg.slice(0, 120))
+    if (/Arrearage|欠费|Access denied/i.test(msg)) console.log('  → 是 embedding 账户欠费/不可用，不是检索逻辑的问题；上面目录的结果仍然有效。')
+    process.exit(0)
+  }
   const hits = (r.hits || []).filter((h) => Number(h.score) >= 0.35)
   const topScore = Number(hits[0]?.score || 0)
   const ragVerdict = topScore >= 0.62 ? 'MATCHED' : hits.length ? 'AMBIGUOUS' : 'NOT_FOUND'
