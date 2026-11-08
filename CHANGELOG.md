@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.13.11 — 2026-11-08
+
+### 上下文账：把每轮输入拆开看
+
+看到别人做了「上下文仪表盘」之后补的。数据全部来自会话日志，不调模型、不花钱：
+
+- `lib/sessionlog.mjs`：按 zstd 帧读 `session.v4.jsonl.zstd`（追加式写，一文件多帧）
+- `lib/ctxreport.mjs`：从 `turn/start` / `assistant/message` 的 `usage` 统计每轮输入/输出，认折叠块与压缩事件，并把人格/记忆/账本的注入量按文件大小估出来
+- `tools/14-pages/context-report.mjs`：命令行看一份报告（`npm run ctx`）
+- 面板新增 `GET /dsh-soul-seed/api/context`
+
+**口径写死在代码里**：token 是估算（中文 1.5/字、其它 0.25/字符），输出里明确写「不是 tokenizer 实测」—— 不冒充实测数。
+
+实测一份 387 轮的真实会话：每轮输入平均 9,958 tok，最大 715,713 tok，压缩 4 次，折叠 2 个。
+
 ## 0.13.10 — 2026-11-08
 
 ### 修：`lib/rag.mjs` 读错了目录变量（设了 `DSH_SHARED_DIR` 也没用）
