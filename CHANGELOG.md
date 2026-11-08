@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.13.10 — 2026-11-08
+
+### 修：`lib/rag.mjs` 读错了目录变量（设了 `DSH_SHARED_DIR` 也没用）
+
+`soulDir()` 读的是 `DSH_SOUL_DIR` —— 那是灵魂数据目录，不是共享工作区。结果：设了 `DSH_SHARED_DIR` 依然去 `~/.dsh/im` 找落叶，任何想把索引指到别处的用法都静默失效。
+
+现在顺序：`DSH_SHARED_DIR` → `SOUL_HOME` → `~/.dsh/im`。
+
+同时：`image-keys.json` 的查找从写死 `~/.bili-ai` 改成跟着灵魂数据目录走（`DSH_SOUL_DIR` → `~/.dsh/soul-seed` → 老位置）。
+
+**这个 bug 是在跑 memu-bench-714 小样时暴露的** —— 本来想用临时工作区装评测历史，结果检索翻的全是自己的日记。
+
 ## 0.13.9 — 2026-11-08
 
 ### 去掉仓库里的个人痕迹
