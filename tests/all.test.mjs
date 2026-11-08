@@ -26,9 +26,11 @@ const TOOL = {
 
 let bad = 0;
 const ok = (cond, label) => { console.log(`  ${cond ? "·" : "✗"} ${label}`); if (!cond) bad++ };
+// 测试一律写临时目录：以前没隔离，把测试条目写进了真实 memory.json（2026-11-08 修）
+const SOUL_TEST_HOME = fs.mkdtempSync(path.join(os.tmpdir(), "soul-test-"));
 const run = async (name, ...args) => {
   const p = path.join(ROOT, TOOL[name]);
-  try { const { stdout } = await exec(process.execPath, [p, ...args], { timeout: 30000 }); return stdout }
+  try { const { stdout } = await exec(process.execPath, [p, ...args], { timeout: 30000, env: { ...process.env, DSH_SOUL_DIR: SOUL_TEST_HOME } }); return stdout }
   catch (e) { return String(e.stdout || e.stderr || e.message) }
 };
 
