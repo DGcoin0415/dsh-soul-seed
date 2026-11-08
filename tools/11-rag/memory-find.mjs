@@ -23,9 +23,25 @@ if (args[0] === 'index' || args[0] === 'stat') {
     console.log(`完成：共 ${r.total} 块，新增 ${r.added} 块`)
   } else {
     const idx = loadIndex()
-    console.log(`索引：${idx.chunks.length} 块 · ${idx.model} · 建于 ${idx.builtAt || '未建'}`)
+    const builtAt = (() => {
+      try {
+        const metaP = path.join(indexDir(), 'index.meta.json')
+        if (fs.existsSync(metaP)) {
+          const m = JSON.parse(fs.readFileSync(metaP, 'utf8'))
+          if (m.builtAt) return new Date(m.builtAt).toISOString().slice(0, 16).replace('T', ' ')
+        }
+        // meta 里没有 builtAt 时，退到索引文件的修改时间
+        const binP = path.join(indexDir(), 'index.bin')
+        if (fs.existsSync(binP)) return fs.statSync(binP).mtime.toISOString().slice(0, 16).replace('T', ' ')
+        const jsonP = path.join(indexDir(), 'index.json')
+        if (fs.existsSync(jsonP)) return fs.statSync(jsonP).mtime.toISOString().slice(0, 16).replace('T', ' ')
+      } catch {}
+      return ''
+    })()
+    console.log(`索引：${idx.chunks.length} 块 · ${idx.model || '?'} · 建于 ${builtAt || '未知'}`)
     console.log(`原文目录：${longDir()}`)
-    console.log(`索引文件：${path.join(indexDir(), 'index.json')}`)
+    const binPath = path.join(indexDir(), 'index.bin')
+    console.log(`索引文件：${fs.existsSync(binPath) ? binPath + '（二进制）+ ' + path.join(indexDir(), 'index.meta.json') : path.join(indexDir(), 'index.json')}`)
   }
   process.exit(0)
 }

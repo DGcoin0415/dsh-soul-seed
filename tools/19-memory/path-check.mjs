@@ -32,10 +32,13 @@ const resolveOne = (raw, fromFile) => {
 }
 
 const missing = []
+const optional = []          // 可选文件：缺了只提示，不算失败
 for (const rel of FILES) {
   const file = path.join(IM, rel)
   if (!exists(file)) {
-    missing.push(`${rel}（文件本身不在）`)
+    // SHARED-STATE.md 只在配了跨工作区同步时才有；AGENTS.md 取决于部署者的工作区模板。
+    // 这两个不是坏的证据，报成失败会让人天天看见红灯。
+    optional.push(rel)
     continue
   }
   const text = fs.readFileSync(file, 'utf8')
@@ -50,6 +53,9 @@ for (const rel of FILES) {
 }
 
 const uniq = [...new Set(missing)]
+if (optional.length && !quiet) {
+  console.log('可选页不在（不算问题）：' + optional.join('、'))
+}
 if (uniq.length === 0) {
   if (!quiet) console.log('指针全通，没有走不通的')
   process.exit(0)
