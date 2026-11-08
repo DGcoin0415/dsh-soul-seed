@@ -3,6 +3,9 @@ import { soulHome } from '../../lib/home.mjs'
 // memory.mjs —— 长期记忆：会淡忘，才记得住重要的
 //
 //   node memory.mjs add "用户 说他不吃香菜" --imp 4 --tag 偏好
+//   node memory.mjs promise "晚上八点提醒我交表" [--at 2026-11-09] [--status 待办]
+//   node memory.mjs promise --list [--all]              看未完成的约定
+//   node memory.mjs promise "晚上八点提醒我交表" --done   标完成
 //   node memory.mjs recall [关键词] [--n 10]
 //   node memory.mjs list
 //   node memory.mjs forget <id|关键词>
@@ -64,7 +67,72 @@ const fmt = (it) => {
 
 const db = load();
 
-if (cmd === "add") {
+if (cmd === "promise") {
+  // 约定 / 计划：单独一栏。约定考的是「进展 + 下一步」，
+  // 混在流水记忆里检索出来只有半句，答不上「到哪一步了」。
+  const rest = argv.slice(1)
+  const wantList = rest.includes("--list")
+  const all = rest.includes("--all")
+  const done = rest.includes("--done")
+  const atI = rest.indexOf("--at")
+  const stI = rest.indexOf("--status")
+  const text = rest
+    .filter((a, i) => !a.startsWith("--") && rest[i - 1] !== "--at" && rest[i - 1] !== "--status")
+    .join(" ")
+    .trim()
+
+  const store = load().items
+
+  if (wantList) {
+    const open = store.filter((m) => m.kind === "promise" && (all || m.status !== "完成"))
+    if (!open.length) console.log("没有未完成的约定")
+    else for (const m of open) {
+      console.log(
+        `- [${m.status || "待办"}] ${m.text}` +
+        (m.at ? "  · 期限 " + m.at : "") +
+        (m.progress ? "  · 进展 " + m.progress : "")
+      )
+    }
+    process.exit(0)
+  }
+
+  if (!text) {
+    console.log('用法: node memory.mjs promise "约定内容" [--at 日期] [--status 待办|进行中] [--done]')
+    process.exit(1)
+  }
+
+  // 同一件事再记一次 = 更新，不新增
+  const same = store.find((m) => m.kind === "promise" && m.text === text)
+  if (same) {
+    if (atI >= 0) same.at = rest[atI + 1]
+    if (stI >= 0) same.status = rest[stI + 1]
+    if (done) same.status = "完成"
+    same.updatedAt = Date.now()
+    save(load())
+    const db2 = load()
+    db2.items = store
+    save(db2)
+    console.log("更新约定：" + text + "（" + (same.status || "待办") + "）")
+    process.exit(0)
+  }
+
+  const db3 = load()
+  db3.items.push({
+    id: "p" + Date.now().toString(36),
+    kind: "promise",
+    text,
+    at: atI >= 0 ? rest[atI + 1] : null,
+    status: done ? "完成" : stI >= 0 ? rest[stI + 1] : "待办",
+    progress: "",
+    tags: ["约定"],
+    imp: 5,
+    at_ts: Date.now(),
+  })
+  save(db3)
+  console.log("记下约定：" + text + (atI >= 0 ? "（期限 " + rest[atI + 1] + "）" : ""))
+  process.exit(0)
+
+} else if (cmd === "add") {
   const text = pos.join(" ").trim();
   if (!text) { console.error('用法：node memory.mjs add "一句话" [--imp 3] [--tag 偏好]'); process.exit(2) }
   const imp = Math.max(1, Math.min(5, Number(opt("imp", 3))));
