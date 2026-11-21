@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.13.24 — 2026-11-21
+
+### 补上骨架里缺的三件能力脚本
+
+- `tools/15-continuity/tidy-continuity.mjs`：每两小时整理接续——没完成的留在接续里，完成后超两小时的转成一条结论写进历史（带出处）。
+- `tools/15-continuity/tidy-loop.mjs`：常驻进程版，每 2 小时跑一次上面那个，不占 token。
+- `tools/16-selfscan/scan-self.mjs`：上线先扫自己有什么（生图链路、模型目录、ComfyUI），写回根页 AUTO 区，顺手记工具/插件变更。
+- `tools/01-memory/memory-note.mjs`：一条记忆写三行（触点 / 变 / 图），不写小作文。
+
 ## 0.13.23 — 2026-11-21
 
 ### 记忆检索带失效标记
