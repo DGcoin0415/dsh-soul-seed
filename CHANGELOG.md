@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.13.25 — 2026-11-21
+
+### 跨会话扫描做成可开关
+
+- 新脚本 `tools/15-continuity/cross-session.mjs`：扫 `shared/实时/*.md` 和 `接续.md`，把最近 12 小时各渠道说过的话聚成一页 `shared/跨会话.md`（默认最多 40 条，带时间、渠道）。
+- 开关：`shared/跨会话.json` 写 `{"enabled": true, "hours": 12, "max": 40}` 才扫；文件不存在或 enabled 不是 true 就跳过。`--status` 看状态，`--force` 强制扫一次。
+- `tidy-loop` 每 2 小时顺带跑一次（开关开着才生效），不用定时起会话。
+
 ## 0.13.24 — 2026-11-21
 
 ### 补上骨架里缺的三件能力脚本
