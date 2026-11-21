@@ -30,6 +30,14 @@ function conclusionOf(text) {
   return last ? last.replace(/^[-*>]\s*/, '').replace(/[`*]/g, '').slice(0, 90) : ''
 }
 
+// 失效标记：只看这条自己的结论句——写「状态：作废」或「（作废：…）」才算失效。
+// [作废] 标签是「这条作废了更早的条」，它自己通常仍是现行，不能拿来判失效。
+// 判结论句、不判整份文件：历史文件里新旧条混着，整份标作废会把活条一起扔掉。
+const VOID_RE = /状态\s*[:：]\s*作废|（作废[:：]|\(作废[:：]/
+function statusOf(conclusion) {
+  return VOID_RE.test(String(conclusion || '')) ? '作废' : '现行'
+}
+
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, e.name)
@@ -57,6 +65,7 @@ for (const f of walk(SHARED)) {
     name: path.basename(f),
     summary: firstLine(text),
     conclusion: conclusionOf(text),
+    status: statusOf(conclusionOf(text)),
     heads: secHeads.map((m) => m[1].trim()).slice(0, 12),
     size: text.length,
     mtime,
@@ -76,6 +85,7 @@ for (const f of walk(SHARED)) {
       name: path.basename(f),
       summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`,
       conclusion: conclusionOf(body),
+      status: statusOf(conclusionOf(body)),
       heads: [m[1].trim()],
       size: body.length,
       mtime,
@@ -93,14 +103,14 @@ for (const extra of ['AGENTS.md', 'SHARED-STATE.md']) {
   const totalLines = text.split('\n').length
   const secHeads = [...text.matchAll(/^##\s+(.+)$/gm)]
   const lineOf = (idx) => text.slice(0, idx).split('\n').length
-  rows.push({ path: extra, name: extra, summary: firstLine(text), conclusion: conclusionOf(text), heads: secHeads.map((m) => m[1].trim()).slice(0, 12), size: text.length, mtime: fs.statSync(full).mtimeMs, line: 1, lineEnd: totalLines })
+  rows.push({ path: extra, name: extra, summary: firstLine(text), conclusion: conclusionOf(text), status: statusOf(conclusionOf(text)), heads: secHeads.map((m) => m[1].trim()).slice(0, 12), size: text.length, mtime: fs.statSync(full).mtimeMs, line: 1, lineEnd: totalLines })
   secHeads.forEach((m, i) => {
     const start = m.index + m[0].length
     const end = i + 1 < secHeads.length ? secHeads[i + 1].index : text.length
     const body = text.slice(start, end).trim()
     if (body.length < 40) return
     const line = body.split('\n').map((l) => l.trim()).find((l) => l && !l.startsWith('|') && !l.startsWith('>')) || ''
-    rows.push({ path: `${extra}#${m[1].trim()}`, name: extra, summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`, conclusion: conclusionOf(body), heads: [m[1].trim()], size: body.length, mtime: fs.statSync(full).mtimeMs, line: lineOf(m.index), lineEnd: lineOf(end) })
+    rows.push({ path: `${extra}#${m[1].trim()}`, name: extra, summary: `${m[1].trim()} —— ${line.replace(/[`*|]/g, '').slice(0, 70)}`, conclusion: conclusionOf(body), status: statusOf(conclusionOf(body)), heads: [m[1].trim()], size: body.length, mtime: fs.statSync(full).mtimeMs, line: lineOf(m.index), lineEnd: lineOf(end) })
   })
 }
 for (const jf of fs.readdirSync(SHARED).filter((x) => x.endsWith('.json'))) {

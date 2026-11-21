@@ -52,6 +52,8 @@ const budgetI = args.indexOf('--budget')
 const BUDGET = budgetI >= 0 ? Number(args[budgetI + 1]) : 1600
 const tagI = args.indexOf('--tag')
 const TAG = tagI >= 0 ? String(args[tagI + 1] || '').toLowerCase() : ''
+// 失效标记：索引里 conclusion 写了「状态：作废」/「（作废：…）」的条，默认当没写；--all 才翻出来
+const showVoid = args.includes('--all')
 
 // 三块配额：路径清单 1/4，摘要正文不到一半，向量兜底三成，谁也不能借谁的
 const SLICE = { paths: Math.round(BUDGET * 0.4), summaries: Math.round(BUDGET * 0.35), vectors: Math.round(BUDGET * 0.25) }
@@ -70,11 +72,11 @@ if (betI >= 0 && typeof args[betI + 1] === 'string' && args[betI + 1].includes('
   if (Number.isFinite(from) && Number.isFinite(to)) BET = [from, to]
 }
 
-const OMIT = new Set(['--top', '--budget', '--tag', '--at', '--between'])
+const OMIT = new Set(['--top', '--budget', '--tag', '--at', '--between', '--all'])
 const query = args.filter((a, i) => !a.startsWith('--') && !OMIT.has(args[i - 1])).join(' ').trim()
 
 if (!query && !TAG) {
-  console.log('用法：node memory-find.mjs "想问的事" [--rag] [--budget 1600] [--tag 标签]')
+  console.log('用法：node memory-find.mjs "想问的事" [--rag] [--budget 1600] [--tag 标签] [--all]')
   process.exit(1)
 }
 
@@ -114,6 +116,7 @@ const rows = fs.existsSync(IDX)
   .split('\n')
   .filter(Boolean)
   .map((l) => JSON.parse(l))
+  .filter((r) => showVoid || r.status !== '作废')
   .filter((r) => !TAG || (r.tags || []).some((t) => String(t).toLowerCase().includes(TAG)))
   .filter((r) => inWindow(r.mtime))
   : []
@@ -204,7 +207,7 @@ if (top.length) {
     // 证据链：带行号，命中就能直接翻到原文那一段
     const at = r.line ? `:${r.line}${r.lineEnd && r.lineEnd !== r.line ? '-' + r.lineEnd : ''}` : ''
     const ago = age(r.mtime) + (r.mtime ? '（' + new Date(r.mtime).toISOString().slice(0, 10) + '）' : '')
-    const pLine = `- ${r.score.toFixed(2)}  ${r.path}${at}${tagStr}${ago ? '  ·' + ago : ''}`
+    const pLine = `- ${r.score.toFixed(2)}  ${r.status === '作废' ? '〔作废〕' : ''}${r.path}${at}${tagStr}${ago ? '  ·' + ago : ''}`
     if (pathUsed + len(pLine) > SLICE.paths) {
       dropped += 1
       continue
