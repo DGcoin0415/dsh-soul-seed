@@ -5,7 +5,7 @@
 ### 上下文检查改读真 token，到量自动更新交接
 
 - `tools/14-pages/context-check.mjs` 不再按 zstd 压缩文件大小估：解会话文件读最后一条 assistant/message 的 usage.totalTokens，按 1048576 窗口算百分比；已超窗结束的旧会话不再误报；阈值默认改 60。
-- 新增本机插件 `@local/dsh-compact-self`：监听会话 usage，到 60% 起每涨 5% 就把 `shared/交接.md` 整份重写一遍（接续 + 现在 + 继承），不调模型、不注入提示词、不花额外 token。
+- 新增本机插件 `@local/dsh-compact-self`：监听会话 usage，到 60% 起每涨 5% 就把 `shared/交接.md` 整份重写一遍（接续 + 现在 + 继承），不调模型、不注入提示词、不花额外 token。源码在 `tools/14-pages/compact-self/`，用 `plugin_manager` 的 `install_bundle` 指向该目录即可安装。
 - 原来每 30 分钟唤醒会话的定时检查暂停，平时不再查，不再重复花系统提示的钱。
 
 ## 0.13.27 — 2026-11-23
