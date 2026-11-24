@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.13.34 — 2026-11-24
+
+### 状态文件改原子写（跟小黑盒插件学的）
+
+- 新增 `lib/atomic.mjs`：`atomicWrite()` 先写临时文件、`fsync`、再 `rename`。写到一半断电或被占用时，不会留下半截 JSON 把下次读炸掉。
+- `lib/continuity.mjs`、`lib/pages.mjs`、`lib/tidy.mjs` 里写 `.continuity-schedule.json`、`.pages-schedule.json`、`.tidy-schedule.json` 全部换成原子写。
+
 ## 0.13.33 — 2026-11-24
 
 ### 轨道审计：半自动识别「重复做但没写轨道」的活
