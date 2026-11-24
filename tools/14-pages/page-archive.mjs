@@ -3,6 +3,7 @@ import zlib from 'node:zlib'
 import path from 'node:path'
 import os from 'node:os'
 import crypto from 'node:crypto'
+import { selfName } from '../../lib/selfname.mjs'
 
 // 把对话按「12 小时一页」切好，存到 <SOUL_HOME>/shared/全量/页/。
 // 新会话只按页往前翻，翻不到才去看整天全量。
@@ -11,6 +12,7 @@ import crypto from 'node:crypto'
 // 可选环境变量：
 //   SOUL_HOME      灵魂工作区，默认 ~/.dsh/im
 //   SOUL_SESSIONS  DSH 会话目录，默认 ~/.dsh/sessions
+const SELF = selfName()
 const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
 const ARCHIVE = SESSIONS + '-archive'
@@ -115,7 +117,7 @@ for (const file of sessions()) {
       role = '用户'
     } else if (d.type === 'assistant/message') {
       text = textOf(d.data?.message?.content).trim()
-      role = '米萨'
+      role = SELF
     }
     if (!role || !text) continue
     if (text.startsWith('<') || NOISE.some((n) => text.startsWith(n))) continue

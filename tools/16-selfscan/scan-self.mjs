@@ -10,6 +10,7 @@
 
 import { existsSync, readdirSync, statSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { selfName } from '../../lib/selfname.mjs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
@@ -60,7 +61,7 @@ function guessPurpose(file) {
   return ''
 }
 
-line('== 米萨家底扫描 ' + new Date().toLocaleString('zh-CN') + ' ==')
+line('== ' + selfName() + '家底扫描 ' + new Date().toLocaleString('zh-CN') + ' ==')
 line()
 
 // --- ComfyUI ---

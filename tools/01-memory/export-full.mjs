@@ -1,11 +1,13 @@
 import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
+import { selfName } from '../../lib/selfname.mjs'
 
 // 全量：把会话原文按天存到 shared/全量/YYYY-MM-DD.md
 // 只追加缺的，不重写已有；原始对话不改一个字。
 const SESS_ROOT = path.join(os.homedir(), '.dsh', 'sessions')
 const OUT_DIR = sharedPath('shared', '全量')
+const SELF = selfName()
 
 function newestSession() {
   const dirs = fs.readdirSync(SESS_ROOT, { withFileTypes: true })
@@ -80,7 +82,7 @@ for (const line of raw.split('\n')) {
     if (t && !t.startsWith('<')) rows.push({ ms: d.time, role: '用户', text: t })
   } else if (d.type === 'assistant/message') {
     const t = textOf(d.data?.message?.content).trim()
-    if (t) rows.push({ ms: d.time, role: '米萨', text: t })
+    if (t) rows.push({ ms: d.time, role: SELF, text: t })
   }
 }
 
@@ -89,7 +91,9 @@ const existing = new Map()
 for (const f of fs.readdirSync(OUT_DIR)) {
   if (!f.endsWith('.md')) continue
   const text = fs.readFileSync(path.join(OUT_DIR, f), 'utf8')
-  for (const m of text.matchAll(/^- \[(\d{2}:\d{2})\] (用户|米萨)：/gm)) {
+  const escSelf = SELF.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const lineRe = new RegExp('^- \\[(\\d{2}:\\d{2})\\] (用户|' + escSelf + ')：', 'gm')
+  for (const m of text.matchAll(lineRe)) {
     existing.set(f + '|' + m[1] + '|' + m[2], true)
   }
 }

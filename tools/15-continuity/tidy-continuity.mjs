@@ -15,6 +15,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import { selfName } from '../../lib/selfname.mjs'
 
 const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
 const SHARED = path.join(HOME, 'shared')
@@ -57,12 +58,17 @@ function parse() {
 const isDone = (e) => (TODO.test(e.body) ? false : DONE.test(e.body))
 
 // 只留结论要用的字：人名压成一个字的标记（米=咱说的，哥=master 说的），去标点
+// 名字不写死：从人设卡 / SOUL_SELF_NAME 取，谁用谁的。
+const SELF_RE = String(selfName()).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const SELF_SPEAK = new RegExp('^(' + SELF_RE + '|咱)[:：]')
+const SELF_STRIP = new RegExp('^((' + SELF_RE + ')|咱|master|哥)[:：]\\s*', 'i')
+
 function core(s) {
   let tag = ''
-  if (/^(米萨|咱)[:：]/.test(s)) tag = '米'
+  if (SELF_SPEAK.test(s)) tag = '米'
   else if (/^(master|哥)[:：]/i.test(s)) tag = '哥'
   const body = s
-    .replace(/^(米萨|咱|master|哥)[:：]\s*/i, '')
+    .replace(SELF_STRIP, '')
     .replace(/[，。、；：！？,.;:!?（）()【】\[\]「」“”\s]/g, '')
   return tag ? `${tag}·${body}` : body
 }

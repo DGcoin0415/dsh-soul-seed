@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.13.32 — 2026-11-24
+
+### 助手名字不再写死：新增 lib/selfname.mjs
+
+- 新模块 `lib/selfname.mjs`：取当前这具躯体的名字，顺序是 `SOUL_SELF_NAME` 环境变量 → 工作区 `人设卡配置.json` 选的那张卡的 `name` → `persona-cards/` 里第一张有名字的卡 → 兜底「助手」。
+- `tools/01-memory/export-full.mjs`、`14-pages/{compact-session,live-feed,page-archive}.mjs`、`15-continuity/tidy-continuity.mjs`、`16-selfscan/scan-self.mjs` 里写死的助手名字全部改成 `selfName()`，谁用谁的卡就显示谁的名字。
+
 ## 0.13.31 — 2026-11-24
 
 ### 去掉仓库里的私人痕迹：卡 id 不再写死

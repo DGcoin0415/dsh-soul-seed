@@ -7,7 +7,9 @@ import zlib from 'node:zlib'
 import path from 'node:path'
 import os from 'node:os'
 import crypto from 'node:crypto'
+import { selfName } from '../../lib/selfname.mjs'
 
+const SELF = selfName()
 const DSH = path.join(os.homedir(), '.dsh')
 const HOME = process.env.DSH_SOUL_DIR || process.env.SOUL_HOME || path.join(DSH, 'im')
 const SESSIONS = path.join(DSH, 'sessions')
@@ -204,7 +206,7 @@ function scan() {
         role = '用户'
       } else if (d.type === 'assistant/message') {
         text = textOf(d.data?.message?.content).trim()
-        role = '米萨'
+        role = SELF
       }
       if (!role || !text) continue
       if (text.startsWith('<') || NOISE.some((n) => text.startsWith(n))) continue

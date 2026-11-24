@@ -2,10 +2,12 @@ import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
 import os from 'node:os'
+import { selfName } from '../../lib/selfname.mjs'
 
 // 把最近 N 小时的对话抽成一页「接续」，给新会话当开头。
 // 用法：node tools/14-pages/compact-session.mjs [小时数，默认 12]
 // 可选环境变量：SOUL_HOME（默认 ~/.dsh/im）、SOUL_SESSIONS（默认 ~/.dsh/sessions）
+const SELF = selfName()
 const HOME = process.env.SOUL_HOME || path.join(os.homedir(), '.dsh', 'im')
 const SESSIONS = process.env.SOUL_SESSIONS || path.join(os.homedir(), '.dsh', 'sessions')
 const OUT = path.join(HOME, 'shared', '接续.md')
@@ -89,7 +91,7 @@ for (const s of found) {
       role = '用户'
     } else if (d.type === 'assistant/message') {
       text = textOf(d.data?.message?.content).trim()
-      role = '米萨'
+      role = SELF
     }
     if (!role || !text || noisy(text)) continue
     text = text.replace(/\n+/g, ' ').trim()
