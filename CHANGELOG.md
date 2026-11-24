@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.13.29 — 2026-11-24
+
+### 接续整理挂进插件、向量索引改 int8、上下文加绝对上限
+
+- 新增 `lib/continuity.mjs`：接续整理从「定时任务起新会话跑脚本」改成插件内计时器，每 N 小时（默认 6，0/6/12/18 点）在工作区跑 `tidy-continuity.mjs` + `cross-session.mjs`；不新开会话、不占 token，DSH 重启后错过的时间点自动补跑（状态在 `.continuity-schedule.json`）。间隔改 `.continuity-config.json` 的 `hours` 即可。
+- `lib/rag.mjs` 索引升到 v3：向量从 Float32 改 int8 量化（每块一个 float32 缩放 + dim 个 int8），1581 块 1024 维从 6.18MB 降到 1.55MB，重建误差平均 1.6e-4；旧 v2 文件仍可读，读进来下次保存自动转 v3。
+- `lib/index.js` 上下文归档加绝对上限 `SOUL_CTX_MAX`（默认 24 万字符）：以前只按比例摘 40%，会话越长剩下的 60% 越大，爆满的会话每轮仍要发 80 万字符；现在按 user 边界继续往前推，单轮输入封顶。
+- `lib/tidy.mjs` 把 `resolveNode` 导出，给 continuity 复用。
+
 ## 0.13.28 — 2026-11-23
 
 ### 上下文检查改读真 token，到量自动更新交接
