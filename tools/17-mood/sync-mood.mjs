@@ -1,7 +1,7 @@
 import { sharedPath } from '../../lib/shared.mjs'
 import os from 'node:os'
 import path from 'node:path'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { writeFileRetry } from '../19-memory/write-retry.mjs'
 
@@ -71,9 +71,23 @@ function updateShared(block) {
   writeFileRetry(SHARED, text)
 }
 
+function cardMemoryPath() {
+  // 用哪张卡看工作区的 人设卡配置.json；没配就取 memories 目录里第一份，别写死某一张
+  try {
+    const cfg = JSON.parse(readFileSync(sharedPath('shared', '..', '人设卡配置.json'), 'utf8'))
+    if (cfg && cfg.card) return path.join(os.homedir(), '.dsh', 'persona-cards', 'memories', cfg.card + '.json')
+  } catch {}
+  try {
+    const dir = path.join(os.homedir(), '.dsh', 'persona-cards', 'memories')
+    const f = readdirSync(dir).filter((n) => n.endsWith('.json') && !n.includes('.bak'))[0]
+    if (f) return path.join(dir, f)
+  } catch {}
+  return null
+}
+
 function updateCard(entry) {
-  const card = path.join(os.homedir(), '.dsh/persona-cards/memories/card-mvqnzinf.json')
-  if (!existsSync(card)) return false
+  const card = cardMemoryPath()
+  if (!card || !existsSync(card)) return false
   try {
     const d = JSON.parse(readFileSync(card, 'utf8'))
     const m = entry.mood || {}
