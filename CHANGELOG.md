@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.13.30 — 2026-11-24
+
+### 并进本机在用的三样：人设卡注入、自动续跑、12 小时分页
+
+- 新增 `lib/card.mjs`：人设卡自带注入，读 `~/.dsh/persona-cards/<id>.json` 和 `memories/<id>.json`，把「好感度 / 心情 / 记得的事」渲进系统提示；用哪张看 `shared/人设卡配置.json`，文件不存在就先列卡问主家。宿主没有 systemPrompt 服务时自动跳过。
+- 新增 `lib/autocontinue.mjs`：自动续跑（从 dsh-auto-continue 收紧版搬来），只续限流 / 空回复 / 被输出上限截断，最多 2 次；欠费、配额、凭证、上下文超限一律不续。
+- 新增 `lib/pages.mjs`：12 小时分页，0 点 / 12 点各刷一次，开机发现错过就补跑。
+- `lib/index.js` 把这三样接上（`apply()` 里和修枝、自动入库并列）；`lib/pages.mjs` / `lib/continuity.mjs` 的脚本路径改成两套都认——工作区根目录（老部署）或仓库的 `tools/14-pages`、`tools/15-continuity`。
+
 ## 0.13.29 — 2026-11-24
 
 ### 接续整理挂进插件、向量索引改 int8、上下文加绝对上限
