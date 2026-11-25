@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.14.0 — 2026-11-25
+
+### 把老插件的四件能力按功能移植进来（功能合并，不是补丁）
+
+- **根页注入**：新增 `lib/soulcore.mjs`，从 `soulHome()/SHARED-STATE.md` 读根页、截断 6000 字，注册 systemPrompt section `misa-soul-root`（order 140）。文件不存在就整段跳过。
+- **跨渠道最近三条**：`crossChannelTail()` 读 `shared/实时/` 最新一页，带最近三条进根页 section；路径走 `sharedRoot()`，不写死任何工作区。
+- **上下文压力预警**：新增 section `misa-ctx-guard`（order 141），读 `tokenMeter.contextPressure`，默认阈值 0.60（`SOUL_CTX_WARN=0` 关闭），到线时要求模型第一句先提醒「上下文快满了」。
+- **轨道机制**：新增 `lib/tracks.mjs`，数据落 `shared/轨道.json`，原子写走 `lib/atomic.mjs`；不再依赖旧的 `sharedDir()`。
+- **soul 工具（最小集）**：`ctx.inject(['tools'])` + `tools.register` 注册 `soul`，只开 `tree` / `read` / `note` / `rag-recall` / `track-save` / `track-show` 六个 action。`rag-recall` 是本地关键词检索（不联网、不花钱）。
+- **数据边界**：全部落仓库自己的数据目录（`home.mjs` → `~/.dsh/soul-seed`），显式设了 `DSH_SHARED_DIR` / `SOUL_HOME` 才跟过去；默认不读也不写 `~/.dsh/im`。
+- 版本 0.13.36 → 0.14.0。其余 action（person-*、decay、tidy、leaves、init、where、track-list、track-bump）留 TODO。
+- **顺带修**：`lib/continuity.mjs` 从 `./soul.mjs` 导 `soulDir`，但那个文件不导出这个函数 —— 0.13.36 的 `lib/index.js` 一 import 就报 `does not provide an export named 'soulDir'`。改成从 `./rag.mjs` 导，插件才能加载。
+
 ## 0.13.36 — 2026-11-24
 
 ### 记忆带场景：负面记忆不再变一刀切禁令

@@ -377,3 +377,16 @@ rm -rf ~/.bili-ai                     # 再清数据
 ```
 
 只想清插件、留记忆：只跑第一行，别动 `~/.bili-ai/`。重装回来能接着用。
+
+## TODO（0.14.0）
+
+`lib/index.js` 里的 `soul` 工具这版只开最小集：`tree` / `read` / `note` / `rag-recall` / `track-save` / `track-show`。
+
+还没搬的 action：
+
+- 按人账本：`person-get` / `person-bump` / `person-mood`
+- 心情：`decay`
+- 维护：`tidy` / `leaves` / `init` / `where`
+- 轨道：`track-list` / `track-bump`
+
+搬的时候沿用现在这层：`lib/soulcore.mjs` 放记忆树读写，`lib/tracks.mjs` 放轨道，路径一律走 `home.mjs` / `soulcore.mjs`，别再写死工作区。
