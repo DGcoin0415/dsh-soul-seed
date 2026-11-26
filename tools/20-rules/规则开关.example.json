@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "省钱": true,
+    "省时间": true,
+    "别弄坏": true,
+    "别泄露": true,
+    "别忘事": true,
+    "能收到": true,
+    "会说话": true,
+    "会干活": true,
+    "会出活": true
+  },
+  "features": {
+    "生图": true,
+    "语音": true,
+    "消息渠道": true,
+    "文档": true,
+    "图片编辑": true,
+    "OCR": true,
+    "渔世界": true,
+    "表情包": true
+  },
+  "plugins": {
+    "save-token": true,
+    "tool-gate": true,
+    "compact-self": true,
+    "unlag": true,
+    "qwen-paint": true,
+    "say": true,
+    "dsh-im": true,
+    "misa-soul": true
+  },
+  "askOnFirstRun": true,
+  "updated": "<首次运行时自动写>"
+}
