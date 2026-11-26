@@ -4,8 +4,10 @@ import os from "node:os";
 import path from "node:path";
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "seed-soulcore-"));
+// 0.15.1-test 起共享工作区默认会走本机 ~/.dsh/im（如果存在），
+// 测试要隔离就把 DSH_SHARED_DIR 显式指到临时目录，只设 DSH_SOUL_DIR 不够。
+process.env.DSH_SHARED_DIR = tmp;
 process.env.DSH_SOUL_DIR = tmp;
-delete process.env.DSH_SHARED_DIR;
 delete process.env.SOUL_HOME;
 
 const core = await import("../lib/soulcore.mjs");
