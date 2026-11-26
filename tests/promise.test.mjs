@@ -12,7 +12,7 @@ function ok(cond, msg) {
 
 const home = fs.mkdtempSync(path.join(os.tmpdir(), "promise-"));
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
-const tool = path.join(here, "..", "5-别忘事", "tools", "01-memory", "memory.mjs");
+const tool = path.join(here, "..", "tools", "01-memory", "memory.mjs");
 const env = { ...process.env, DSH_SOUL_DIR: home };
 
 function run(args) {

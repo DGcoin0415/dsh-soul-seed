@@ -13,7 +13,7 @@ const thoughts = [
   "结论是这台机器的 node 在 dsh-runtimes 里，不能直接敲 node。",
   "也许我该再试试别的方法。",
   "所以要用全路径调 node.exe，已经确认过版本是 24。",
-  "根因是路径写死了 C:\\Users\\someone。",
+  "根因是路径写死了 C:\\Users\\Administrator。",
   "啊这个界面真好看。"
 ].join("\n");
 const points = harvest(thoughts);

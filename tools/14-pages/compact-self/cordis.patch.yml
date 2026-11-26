@@ -1,0 +1,6 @@
+- insert:
+    - id: compact-self
+      name: '@local/dsh-compact-self'
+      config:
+        ratio: 0.6
+        windowTokens: 1048576

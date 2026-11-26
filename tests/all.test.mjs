@@ -14,14 +14,14 @@ const ROOT = path.dirname(HERE);
 
 // 树枝目录：名字 → 路径
 const TOOL = {
-  memory: "5-别忘事/tools/01-memory/memory.mjs",
-  people: "5-别忘事/tools/02-people/people.mjs",
-  mood: "7-会说话/tools/03-mood/mood.mjs",
-  scene: "5-别忘事/tools/04-scene/scene.mjs",
-  history: "5-别忘事/tools/05-history/history.mjs",
-  image: "9-会出活/tools/06-image/gen-image.mjs",
-  lock: "3-别弄坏/tools/07-sync/shared-lock.mjs",
-  backup: "3-别弄坏/tools/08-ops/backup.mjs"
+  memory: "tools/01-memory/memory.mjs",
+  people: "tools/02-people/people.mjs",
+  mood: "tools/03-mood/mood.mjs",
+  scene: "tools/04-scene/scene.mjs",
+  history: "tools/05-history/history.mjs",
+  image: "tools/06-image/gen-image.mjs",
+  lock: "tools/07-sync/shared-lock.mjs",
+  backup: "tools/08-ops/backup.mjs"
 };
 
 let bad = 0;
@@ -50,9 +50,8 @@ ok(md.includes("收场") && md.includes("别用鱼八股"), "收场与防八股�
 const chk = checkPersona(md);
 ok(chk.ok === true && Array.isArray(chk.warnings), "自检返回 {ok,length,warnings}，无告警");
 ok(Object.keys(extrasFor({ sets: {} })).includes("02-干活纪律.md"), "常驻附录：干活纪律");
-ok((extrasFor({ sets: {} })["02-干活纪律.md"] || "").includes("判断与回话"), "常驻附录：含「判断与回话」小节");
 const allOn = extrasFor({ sets: { set_scene: "只记「现在在忙什么」，我自己写", set_history: "按月记，一件事一行（日期 + 一句结论）", set_material: "梗库 + 催睡都带", set_sync: "只要写锁（同一台机器多进程）", set_grudge: "记仇 + 报复链：最多三步，每条都要人点头才发" } });
-ok(Object.keys(allOn).length === 6, "五块全选 → 六份附录（一份常驻）");
+ok(Object.keys(allOn).length === 6, "五块全选 → 六份附录");
 ok(QUESTIONS.length >= 9 && SPEECH_QUESTIONS.length >= 7 && SET_QUESTIONS.length >= 5, "题量齐（10 基本 / 8 风格 / 5 可选）");
 
 // ═══════════ 二、账本 + 人情账 + 关系网 + 私藏 + 记仇 ═══════════

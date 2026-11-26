@@ -1,0 +1,17 @@
+{
+    "strangersInGroup":  "mention-only",
+    "always":  [
+                   "qq:1042442284",
+                   "wx:master",
+                   "master"
+               ],
+    "quiet":  {
+                  "to":  "07:30",
+                  "from":  "01:00"
+              },
+    "dailyCap":  40,
+    "never":  [
+
+              ],
+    "mergeSeconds":  60
+}

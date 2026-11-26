@@ -22,7 +22,7 @@ const idx = [
 ].map((x) => JSON.stringify(x)).join("\n") + "\n";
 fs.writeFileSync(path.join(shared, "索引", "摘要.jsonl"), idx, "utf8");
 
-const tool = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..", "5-别忘事", "tools", "11-rag", "memory-find.mjs");
+const tool = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..", "tools", "11-rag", "memory-find.mjs");
 const env = { ...process.env, DSH_SHARED_DIR: root };
 
 function run(args) {

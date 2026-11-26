@@ -3,16 +3,3 @@ node_modules/
 *.bak
 .DS_Store
 Thumbs.db
-
-# 本地数据与凭据：永不入库
-轨道.json
-people.json
-SHARED-STATE.md
-AGENTS.md
-.credentials.yaml
-*.key
-github-token.txt
-shared/
-history/
-全量/
-实时/

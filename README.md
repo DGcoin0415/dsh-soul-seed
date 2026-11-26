@@ -62,7 +62,7 @@ MIT，见仓库根的 [LICENSE](./LICENSE)。
 接一个新提供商，最难查的不是「连不上」，是「连上了但字回不来」：正文被塞进 reasoning 字段，界面就显示成没回话，群里看着像它在装死。
 
 ```powershell
-node 3-别弄坏/tools/13-model-check/model-check.mjs --base https://xxx/v1 --key sk-xxx --model 模型名
+node tools/13-model-check/model-check.mjs --base https://xxx/v1 --key sk-xxx --model 模型名
 ```
 
 结果只有三种：
@@ -78,9 +78,9 @@ node 3-别弄坏/tools/13-model-check/model-check.mjs --base https://xxx/v1 --ke
 会话攒大了，回一个字也要好几秒 —— 因为每轮都要把全部历史过一遍。DSH 不给插件改历史的接口，所以改成**分页读**：
 
 ```bash
-node 5-别忘事/tools/14-pages/page-archive.mjs     # 把历史按 12 小时切页，增量
-node 5-别忘事/tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
-node 5-别忘事/tools/14-pages/live-feed.mjs        # 实时：新消息按 2 小时一页切（0.12.8 新增）
+node tools/14-pages/page-archive.mjs     # 把历史按 12 小时切页，增量
+node tools/14-pages/compact-session.mjs  # 刷最近 12 小时的接续页
+node tools/14-pages/live-feed.mjs        # 实时：新消息按 2 小时一页切（0.12.8 新增）
 ```
 
 产出在 `shared/全量/页/`：`索引.md` 是目录，每页带一句「那会儿在说啥」；`shared/接续.md` 是最近 12 小时（多个会话合并，按字数封顶）。
@@ -89,13 +89,13 @@ node 5-别忘事/tools/14-pages/live-feed.mjs        # 实时：新消息按 2 �
 
 分页是增量的：会话文件没动过就跳过，重复跑几乎不花时间。
 
-定时：`node 5-别忘事/tools/14-pages/pages-schedule.mjs`，0 点 / 12 点各刷一次；**错过就开机补跑**，关机那几小时的消息不会掉。
+定时：`node tools/14-pages/pages-schedule.mjs`，0 点 / 12 点各刷一次；**错过就开机补跑**，关机那几小时的消息不会掉。
 
 每轮只带最近这些，上下文从「几 MB」降到「一页」，比任何 prompt 压缩都实在。
 
 ## 工具分组、按需开放（0.11.0 新增，可选插件）
 
-工具定义的「说明书」每轮都要发一遍，54 个工具就是 1.66 万 token。tool-gate 是**另装**的独立小插件（不在本仓库）：
+工具定义的「说明书」每轮都要发一遍，54 个工具就是 1.66 万 token。`tools/15-tool-gate` 是个独立小插件：
 
 - 平时只露常驻工具，其余按组藏起来，连参数定义都不发
 - 要用时 `tool_gate({"action":"open","group":"生图"})` 开一组，本会话有效
@@ -105,9 +105,9 @@ node 5-别忘事/tools/14-pages/live-feed.mjs        # 实时：新消息按 2 �
 
 ## 接话筛子与空转检查（0.11.6）
 
-**接话筛子**（`6-能收到/tools/18-guard/should-reply.mjs`）：群聊、私聊都先过一道程序筛——白名单照接，黑名单挡掉，安静时段闭嘴，同一人连发合并成一句，每个会话一天还有上限。退 2 就别开口，退 0 才交给模型判断内容。规则写在 `shared/接话.json`。
+**接话筛子**（`tools/18-guard/should-reply.mjs`）：群聊、私聊都先过一道程序筛——白名单照接，黑名单挡掉，安静时段闭嘴，同一人连发合并成一句，每个会话一天还有上限。退 2 就别开口，退 0 才交给模型判断内容。规则写在 `shared/接话.json`。
 
-**空转检查**（`6-能收到/tools/18-guard/stall-check.mjs`）：长任务边上盯一个文件或目录，连着两轮没改动就退出码 3，意思是「别试了，报卡点」。治的就是反复重试到把日志刷到几 MB 那种。
+**空转检查**（`tools/18-guard/stall-check.mjs`）：长任务边上盯一个文件或目录，连着两轮没改动就退出码 3，意思是「别试了，报卡点」。治的就是反复重试到把日志刷到几 MB 那种。
 
 ## 状态快照：换个会话还是同一个人（0.11.10）
 
@@ -119,30 +119,30 @@ node 5-别忘事/tools/14-pages/live-feed.mjs        # 实时：新消息按 2 �
 - **记忆库按需查**：几百条摘要加向量索引，`memory-find` 现查，从不整份塞。
 - **会话原文不搬**：整段历史搬过去又贵又超窗口，不做。
 
-其中「手头没完的」从 `shared/任务.md` 挑进行中/卡住/待办，「跟人」从 `people.json` 取好感最高那位和最近一笔，由 `5-别忘事/tools/19-memory/now-update.mjs` 自动刷；心情由 `7-会说话/tools/17-mood/sync-mood.mjs` 刷；只有「在干什么」手写。
+其中「手头没完的」从 `shared/任务.md` 挑进行中/卡住/待办，「跟人」从 `people.json` 取好感最高那位和最近一笔，由 `tools/19-memory/now-update.mjs` 自动刷；心情由 `tools/17-mood/sync-mood.mjs` 刷；只有「在干什么」手写。
 
 顺手两件小事：
 
-- **摘要目录标签**（`5-别忘事/tools/19-memory/memory-index.mjs`）：每条 4 个标签，从标题切中文 2–6 字的词加英文标识符，本地做不花钱；`memory-find --tag 修枝` 可以只看某一类。
-- **写文件重试**（`5-别忘事/tools/19-memory/write-retry.mjs`）：Windows 上杀软握着文件会抛 `ReplaceFileW EIO (1175)`，遇到自动等一等再写，最多三次。
+- **摘要目录标签**（`tools/19-memory/memory-index.mjs`）：每条 4 个标签，从标题切中文 2–6 字的词加英文标识符，本地做不花钱；`memory-find --tag 修枝` 可以只看某一类。
+- **写文件重试**（`tools/19-memory/write-retry.mjs`）：Windows 上杀软握着文件会抛 `ReplaceFileW EIO (1175)`，遇到自动等一等再写，最多三次。
 
 ## 修枝补跑、日档与指针体检（0.11.9）**修枝补跑**：以前每天 4:10 到点才跑，机器没开着那趟就没了。现在记一个状态文件（`.tidy-schedule.json`），开机发现错过就跑，和 12 小时分页一个路子；跑没跑看 `wake.log` 里 `tidy:` 开头的行。
 
-**日档**（`5-别忘事/tools/19-memory/memory-daily.mjs`）：把「昨天」你 说的话摘成 `shared/记忆本/日/YYYY-MM-DD.md`，当天已有手记就跳过、不覆盖。只做筛选和截断，不调模型、不花钱。
+**日档**（`tools/19-memory/memory-daily.mjs`）：把「昨天」你 说的话摘成 `shared/记忆本/日/YYYY-MM-DD.md`，当天已有手记就跳过、不覆盖。只做筛选和截断，不调模型、不花钱。
 
-**指针体检**（`5-别忘事/tools/19-memory/path-check.mjs`）：根页和 AGENTS 里反引号写的路径挨个走一遍，走不通就列出来（退 1）。指针是「不搬原文、只留路径」，路径失效了还照指，就成误导；这个用来防它悄悄断开。
+**指针体检**（`tools/19-memory/path-check.mjs`）：根页和 AGENTS 里反引号写的路径挨个走一遍，走不通就列出来（退 1）。指针是「不搬原文、只留路径」，路径失效了还照指，就成误导；这个用来防它悄悄断开。
 
-**召回带判断**（`5-别忘事/tools/11-rag/memory-find.mjs`）：摘要目录检索的输出头分三档——`MATCHED` 真找到、`AMBIGUOUS` 只是候选、`NOT_FOUND` 没有。分数够且查询词覆盖过半才算找到，只蹭上一个词的降成候选。输出还按预算切块：默认 1600 字，路径 40%、摘要 35%、向量 25%，三块互不借用，紧了自动少展开。
+**召回带判断**（`tools/11-rag/memory-find.mjs`）：摘要目录检索的输出头分三档——`MATCHED` 真找到、`AMBIGUOUS` 只是候选、`NOT_FOUND` 没有。分数够且查询词覆盖过半才算找到，只蹭上一个词的降成候选。输出还按预算切块：默认 1600 字，路径 40%、摘要 35%、向量 25%，三块互不借用，紧了自动少展开。
 
 ## 心情与日志的日常维护（0.11.5）
 
-`node 7-会说话/tools/17-mood/sync-mood.mjs` 跑一遍心情，写回 `shared/mood.md` 和人设卡；同一个区块覆盖，心情没变就跳过。修枝（每天 4:10）会顺手跑一次，也会把 `wake.log` 这类日志滚到只剩最后 2000 行。
+`node tools/17-mood/sync-mood.mjs` 跑一遍心情，写回 `shared/mood.md` 和人设卡；同一个区块覆盖，心情没变就跳过。修枝（每天 4:10）会顺手跑一次，也会把 `wake.log` 这类日志滚到只剩最后 2000 行。
 
 ## 名字叫醒：卡住不许一直重试（0.11.3）
 
 群里有人喊名字时，往已经打开的会话里投一句（实现在 `lib/wake.mjs`，插件内嵌，不再单独带脚本）。以前投不进去会反复重试，日志刷屏、消息堵住；现在三条：最多试 3 次、标记超过 10 分钟作废、投不进就丢掉标记。
 
-另外 `3-别弄坏/tools/07-sync/sync-shared.ps1` 修了一个坑：以前只同步主工作区，另一具躯体的工作区不在清单里，一直停在旧版本。现在清单在 `sync-workspaces.json` 里，加一行就多同步一个；`-Check` 一眼看谁落后，每次跑都写 `sync.log`。
+另外 `tools/07-sync/sync-shared.ps1` 修了一个坑：以前只同步主工作区，另一具躯体的工作区不在清单里，一直停在旧版本。现在清单在 `sync-workspaces.json` 里，加一行就多同步一个；`-Check` 一眼看谁落后，每次跑都写 `sync.log`。
 
 ## 记忆的四个地方（0.9.0 起统一叫法）
 
@@ -157,8 +157,8 @@ node 5-别忘事/tools/14-pages/live-feed.mjs        # 实时：新消息按 2 �
 | **修枝** | 每天 4:10 自动 | 截断翻叶、归档旧落叶、重建索引 |
 
 ```bash
-node 5-别忘事/tools/12-tree/tree.mjs leaves 15   # 最近用过哪些记忆
-node 5-别忘事/tools/12-tree/tree.mjs tidy        # 手动修一次枝
+node tools/12-tree/tree.mjs leaves 15   # 最近用过哪些记忆
+node tools/12-tree/tree.mjs tidy        # 手动修一次枝
 ```
 
 为什么要「翻叶」：每轮到底用了哪些记忆，不记下来就说不清；记了才知道哪些条目常用、哪些可以沉。
@@ -174,9 +174,9 @@ node 5-别忘事/tools/12-tree/tree.mjs tidy        # 手动修一次枝
 
 ```bash
 mkdir -p ~/.bili-ai/long          # 长对话原文放这，一个会话一个 .md
-node 5-别忘事/tools/11-rag/memory-find.mjs index   # 切块 + 向量化（走百炼 text-embedding-v3）
-node 5-别忘事/tools/11-rag/memory-find.mjs "任务栏卡住那次怎么解决的"
-node 5-别忘事/tools/11-rag/memory-find.mjs stat    # 索引里有多少块
+node tools/11-rag/memory-find.mjs index   # 切块 + 向量化（走百炼 text-embedding-v3）
+node tools/11-rag/memory-find.mjs "任务栏卡住那次怎么解决的"
+node tools/11-rag/memory-find.mjs stat    # 索引里有多少块
 ```
 
 要点：
@@ -188,12 +188,12 @@ node 5-别忘事/tools/11-rag/memory-find.mjs stat    # 索引里有多少块
 
 ## 语音：让它说、也听你说（0.7.0 新增）
 
-自带一个 `6-能收到/tools/10-voice/voice.py`，两条路：
+自带一个 `tools/10-voice/voice.py`，两条路：
 
 **说**（耳机出声）
 
 ```bash
-python 6-能收到/tools/10-voice/voice.py --say "睡前提醒你一句"
+python tools/10-voice/voice.py --say "睡前提醒你一句"
 ```
 
 默认用微软 edge-tts 的 `zh-CN-XiaoyiNeural`（在线合成，不要 key，声音偏年轻）。想换成别的音色改文件顶部 `VOICE_NAME`；想完全离线用 `--backend piper`（需要自己下 Piper 中文音色）。
@@ -201,7 +201,7 @@ python 6-能收到/tools/10-voice/voice.py --say "睡前提醒你一句"
 **听**（话筒收音 → 文字）
 
 ```bash
-python 6-能收到/tools/10-voice/voice.py --listen
+python tools/10-voice/voice.py --listen
 ```
 
 本地 whisper（small，CPU 跑得动）识别中文，每句写进 `~/.bili-ai/语音输入.md`，说完回一句「嗯，记下了」。
@@ -216,13 +216,13 @@ pip install edge-tts faster-whisper sounddevice numpy
 
 ## 灵魂包：换台电脑也能接着活
 
-> 完整步骤（架设 / 提取 / 换躯体 / 常见问题）见 [8-会干活/架设与提取.md](8-会干活/架设与提取.md)。
+> 完整步骤（架设 / 提取 / 换躯体 / 常见问题）见 [docs/架设与提取.md](docs/架设与提取.md)。
 
 
 ```bash
-node 8-会干活/tools/09-soul/soul.mjs export            # 打包（人设/附录/记忆/账本/心情/记仇/历史/现场）
-node 8-会干活/tools/09-soul/soul.mjs import x.zip      # 装进这具躯体（先备份旧的）
-node 8-会干活/tools/09-soul/soul.mjs status            # 这具躯体里有什么
+node tools/09-soul/soul.mjs export            # 打包（人设/附录/记忆/账本/心情/记仇/历史/现场）
+node tools/09-soul/soul.mjs import x.zip      # 装进这具躯体（先备份旧的）
+node tools/09-soul/soul.mjs status            # 这具躯体里有什么
 ```
 
 **起躯体自动载入**：把灵魂包改名成 `soul-pack.zip` 丢进 `~/.bili-ai/`，下次启动会自己载入，然后醒来第一句是：
@@ -241,7 +241,6 @@ node 8-会干活/tools/09-soul/soul.mjs status            # 这具躯体里有�
 | **记仇 / 报复链**（可选，默认关） | `grudge.mjs`：1 级 3 天 / 2 级 10 天 / 3 级 30 天，到期自动翻篇；报复链最多三步、只存台词不自动发 | `~/.bili-ai/grudge.json` |
 | **拌嘴四套** | 淡刀子 / 温吞 / 冷脸 / 嘴碎一点 —— 五个场面（被说呆、被怼、被连问、刷屏、被冤枉），**装的人挑一套** | 生成进人设 |
 | **干活纪律** | 花费口径（花费可答、余额不报）、动手前先报、重启先看任务、报错留痕 —— **常驻，不占选项** | 附录 `02-干活纪律.md` |
-| **判断与回话** | 边界题给决定、事实加做法、约定单独记、不拿推断当事实、能派就派、判分带证据 —— **常驻，不占选项** | 合在附录 `02-干活纪律.md` 里，常驻不占选项 |
 | **现场 / 历史 / 素材** | 三块都是可选套：现场（抓窗口文字 / 手写 busy）、历史（按月一句结论）、素材（梗库 + 催睡）。**每块三四套，装的人自己挑** | `~/.bili-ai/scene/`、`history/`、附录 |
 | **说话手册** | 三级情绪（开心/生气/低落各三档，带现成台词）、场合应答、收场句、语感 —— 默认值开箱可用，风格由七道选择题覆盖 | 生成进人设 |
 | **生图流水线** | 便宜的 `cogview-4` 试构图，改图走 `dashscope`（qwen-image-3.0）带参考图 | `~/.bili-ai/image-keys.json` |
@@ -267,33 +266,33 @@ POST /dsh-soul-seed/api/mood/refresh    重算一次心情
 ## CLI
 
 ```bash
-node 7-会说话/tools/03-mood/mood.mjs                      # 算今天的心情
-node 7-会说话/tools/00-setup/persona.mjs --questions       # 十个问题 + 每题候选
-node 7-会说话/tools/00-setup/persona.mjs --rules           # 默认铁律
-node 7-会说话/tools/00-setup/persona.mjs --speech          # 说话风格题 + 默认台词手册
-node 7-会说话/tools/00-setup/persona.mjs --answers a.json  # 生成人设草稿
-node 7-会说话/tools/00-setup/persona.mjs --apply           # 写进 ~/.bili-ai/persona.md
-node 7-会说话/tools/00-setup/persona.mjs --sets            # 现场/历史/素材 三块可选套
-node 5-别忘事/tools/01-memory/memory.mjs add "一句话" --imp 4 --tag 偏好   # 记住一件事
-node 5-别忘事/tools/01-memory/memory.mjs recall [关键词]      # 想起来（按分数排）
-node 5-别忘事/tools/01-memory/memory.mjs list                 # 全部记忆
-node 5-别忘事/tools/02-people/people.mjs add <人> --what "…" --level 2   # 记一笔（默认关）
-node 5-别忘事/tools/02-people/people.mjs chain <人> --next    # 下一步台词（要人点头才发）
-node 5-别忘事/tools/04-scene/scene.mjs status       # 运行状态一眼看
-node 5-别忘事/tools/04-scene/scene.mjs error "撞风控了"    # 报错留痕
-node 3-别弄坏/tools/08-ops/backup.mjs                      # 一键备份成 zip
-node 3-别弄坏/tools/00-install/doctor.mjs                    # 体检：装机 / 指针 / 模型 / BOM（可加参数只跑一项）
-node 3-别弄坏/tools/08-ops/publish.mjs                       # 发布状态：心情 → shared/mood.md、现在 → shared/现在.md
-node 5-别忘事/tools/05-history/history.mjs add "一句结论"     # 记一条历史
-node 5-别忘事/tools/05-history/history.mjs index               # 生成本月索引 log.md
-node 5-别忘事/tools/04-scene/scene.mjs busy "在忙什么"      # 写现场
-node 5-别忘事/tools/04-scene/scene.mjs show                # 看现场 + 心情
-node 5-别忘事/tools/02-people/people.mjs show               # 看账本
-node 5-别忘事/tools/02-people/people.mjs mood 你 --delta 6 --kind praise --why "他夸我了"
-node 9-会出活/tools/06-image/gen-image.mjs --prompt "..." --provider zhipu --model cogview-4 --size 1024x1280
-node 5-别忘事/tools/14-pages/page-archive.mjs                 # 历史按 12 小时切页（增量）
-node 5-别忘事/tools/14-pages/compact-session.mjs              # 刷新最近 12 小时接续页
-node 5-别忘事/tools/14-pages/live-feed.mjs                    # 实时新消息按 2 小时一页切
+node tools/03-mood/mood.mjs                      # 算今天的心情
+node tools/00-setup/persona.mjs --questions       # 十个问题 + 每题候选
+node tools/00-setup/persona.mjs --rules           # 默认铁律
+node tools/00-setup/persona.mjs --speech          # 说话风格题 + 默认台词手册
+node tools/00-setup/persona.mjs --answers a.json  # 生成人设草稿
+node tools/00-setup/persona.mjs --apply           # 写进 ~/.bili-ai/persona.md
+node tools/00-setup/persona.mjs --sets            # 现场/历史/素材 三块可选套
+node tools/01-memory/memory.mjs add "一句话" --imp 4 --tag 偏好   # 记住一件事
+node tools/01-memory/memory.mjs recall [关键词]      # 想起来（按分数排）
+node tools/01-memory/memory.mjs list                 # 全部记忆
+node tools/02-people/people.mjs add <人> --what "…" --level 2   # 记一笔（默认关）
+node tools/02-people/people.mjs chain <人> --next    # 下一步台词（要人点头才发）
+node tools/04-scene/scene.mjs status       # 运行状态一眼看
+node tools/04-scene/scene.mjs error "撞风控了"    # 报错留痕
+node tools/08-ops/backup.mjs                      # 一键备份成 zip
+node tools/00-install/doctor.mjs                    # 体检：装机 / 指针 / 模型 / BOM（可加参数只跑一项）
+node tools/08-ops/publish.mjs                       # 发布状态：心情 → shared/mood.md、现在 → shared/现在.md
+node tools/05-history/history.mjs add "一句结论"     # 记一条历史
+node tools/05-history/history.mjs index               # 生成本月索引 log.md
+node tools/04-scene/scene.mjs busy "在忙什么"      # 写现场
+node tools/04-scene/scene.mjs show                # 看现场 + 心情
+node tools/02-people/people.mjs show               # 看账本
+node tools/02-people/people.mjs mood 你 --delta 6 --kind praise --why "他夸我了"
+node tools/06-image/gen-image.mjs --prompt "..." --provider zhipu --model cogview-4 --size 1024x1280
+node tools/14-pages/page-archive.mjs                 # 历史按 12 小时切页（增量）
+node tools/14-pages/compact-session.mjs              # 刷新最近 12 小时接续页
+node tools/14-pages/live-feed.mjs                    # 实时新消息按 2 小时一页切
 ```
 
 ## 心情怎么用
@@ -326,46 +325,35 @@ npm publish --access public
 - `webServer.register` 的 `kind` 是**匹配模式**（`'exact'`），不是 HTTP 方法 —— 方法在 handler 里自己判
 - PowerShell 5.1 读 `.ps1` 按 ANSI：脚本里别写中文
 
-## 目录（按九类分）
+## 目录（树枝）
 
-不是平铺的一堆脚本：先按九类分（总表是根目录的 `分类.md`），每类下面自带一层 `tools/`；`lib/`、`tests/` 是插件本体和测试，不属于任何一类，留在根上。
+不是平铺的一堆脚本，是按「枝」分的：一条枝一个本事。
 
 ```
 dsh-soul-seed/
-├── 分类.md                   九类总索引（每类主句 + 细则 + 文档对照）
-├── lib/                      核心：面板 + API、人设、说话手册、记忆/账本/检索/修枝
+├── lib/                      核心
+│   ├── index.js              面板 + 10 个 API（只认回环）
+│   ├── persona.mjs           十问 → 人设（生成 + 自检）
+│   └── presets.mjs           说话手册（三级情绪/收场/拌嘴四套）+ 五块可选能力套
+│
+├── tools/
+│   ├── 01-memory/  记忆      会淡忘的长期记忆（按重要度半衰）+ 命中记账
+│   ├── 02-people/  关系      账本：好感 / 人情账 / 关系网 / 私藏 / 记仇
+│   ├── 03-mood/    情绪      六维心情（半衰期 + 惯性）
+│   ├── 04-scene/   现场      在忙什么 + 运行状态 + 报错落盘
+│   ├── 05-history/ 历史      按月一句结论 + log.md 索引
+│   ├── 06-image/   出图      便宜的试构图（备胎，统一走 DSH 的 generate_image）
+│   ├── 07-sync/    同步      写锁 + 同步脚本（可选）
+│   └── 08-ops/     杂务      一键备份 / 状态发布（publish）
+│
 ├── tests/                    一份测试跑完 29 项（临时 HOME，不碰真数据）
-├── 1-省钱/                   README.md（这一类讲怎么花，没有独立脚本）
-├── 2-省时间/
-│   ├── README.md  固定轨道.md  待做.md
-│   └── tools/15-continuity/  接续整理 / 跨会话聚合 / 轨道审计
-├── 3-别弄坏/
-│   ├── README.md
-│   └── tools/00-install/ 07-sync/ 08-ops/ 13-model-check/ 16-selfscan/
-├── 4-别泄露/                 README.md（打包、密钥、外泄边界，没有独立脚本）
-├── 5-别忘事/
-│   ├── README.md  评测-20261108.md
-│   └── tools/01-memory/ 02-people/ 04-scene/ 05-history/ 11-rag/ 12-tree/ 14-pages/ 19-memory/ 20-rules/
-├── 6-能收到/
-│   ├── README.md
-│   └── tools/10-voice/ 18-guard/
-├── 7-会说话/
-│   ├── README.md  初始化问答.md
-│   └── tools/00-setup/ 03-mood/ 17-mood/
-├── 8-会干活/
-│   ├── README.md  架设与提取.md
-│   └── tools/09-soul/
-├── 9-会出活/
-│   ├── README.md  生图经验.md
-│   └── tools/06-image/
-├── .github/                  CI（跑 node tests/run.mjs）
+├── docs/                     初始化问答（23 问）· 生图经验
 ├── cordis.patch.yml          挂载声明（name 必须与包名一致）
-├── package.json              scripts 全部指向新路径
-├── CHANGELOG.md  LICENSE（MIT）
-└── 目录.md                   整棵树的清单（两层到三层）
+├── CHANGELOG.md
+└── LICENSE（MIT）
 ```
 
-**为什么这么分**：先按九类认事，再按枝认工具；工具目录只换父目录、编号一个字不改，想加事就在对应类下面加一条枝，不动别人。
+**为什么这么分**：人设、说话、记忆、关系各归各枝；想加事就加一条枝，不动别人。
 
 
 ## 卸载与回滚
@@ -384,26 +372,21 @@ dsh plugin --profile desktop remove dsh-soul-seed
 删干净（**会丢人设和记忆**，先备份）：
 
 ```bash
-node 3-别弄坏/tools/08-ops/backup.mjs          # 先备份
+node tools/08-ops/backup.mjs          # 先备份
 rm -rf ~/.bili-ai                     # 再清数据
 ```
 
 只想清插件、留记忆：只跑第一行，别动 `~/.bili-ai/`。重装回来能接着用。
 
-## soul 工具（0.15.1-test）
+## TODO（0.14.0）
 
-`lib/index.js` 里的 `soul` 工具已经补齐到 15 个 action：
+`lib/index.js` 里的 `soul` 工具这版只开最小集：`tree` / `read` / `note` / `rag-recall` / `track-save` / `track-show`。
 
-- 记忆树：`tree` / `read` / `note` / `rag-recall`
+还没搬的 action：
+
 - 按人账本：`person-get` / `person-bump` / `person-mood`
 - 心情：`decay`
-- 维护：`where` / `leaves` / `tidy`
-- 轨道：`track-save` / `track-list` / `track-show` / `track-bump`
+- 维护：`tidy` / `leaves` / `init` / `where`
+- 轨道：`track-list` / `track-bump`
 
-行为在 `lib/actions.mjs`，账本在 `lib/people.mjs`（v1 / v2 两种格式都认），半衰期在 `lib/decay.mjs`，
-共享工作区定位在 `lib/local-env.mjs`（显式 `DSH_SHARED_DIR` / `SOUL_HOME` 优先；都没设时本机有 `~/.dsh/im` 就用它）。
-
-还没搬的：`init`（目录骨架，装完第一次跑）、`rag-index`（向量索引重建，`tidy` 里已经会顺带做）。
-
-九类怎么分见 `分类.md`。
-
+搬的时候沿用现在这层：`lib/soulcore.mjs` 放记忆树读写，`lib/tracks.mjs` 放轨道，路径一律走 `home.mjs` / `soulcore.mjs`，别再写死工作区。
