@@ -1,0 +1,4 @@
+# dsh-ctx-alert bundle patch: one additive insert row.
+- insert:
+    - id: ctx-alert
+      name: 'dsh-ctx-alert'

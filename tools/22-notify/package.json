@@ -1,0 +1,35 @@
+{
+  "name": "dsh-notify",
+  "version": "0.1.0",
+  "description": "通用主动推送：鱼世界事件、子代理结论、后台任务与定时结果，跑完主动推一条到 master 微信私聊。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "category": "extension",
+    "displayName": "Notify",
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh-notify",
+    "deepseek-harness",
+    "wechat",
+    "notify"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}

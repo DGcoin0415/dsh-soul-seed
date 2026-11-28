@@ -1,0 +1,4 @@
+# dsh-alert-feed bundle patch: one additive insert row.
+- insert:
+    - id: alert-feed
+      name: 'dsh-alert-feed'

@@ -1,0 +1,34 @@
+{
+  "name": "dsh-alert-feed",
+  "version": "0.1.0",
+  "description": "把已经推送出去的告警（上下文/挂账/鱼世界事件）每轮喂回模型自己看：只读 state 下的状态和日志，塞进系统提示最近几条。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "category": "extension",
+    "displayName": "Alert Feed",
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh-alert-feed",
+    "deepseek-harness",
+    "alert",
+    "context"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}

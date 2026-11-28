@@ -1,0 +1,4 @@
+# dsh-misa-soul bundle patch: one additive insert row.
+- insert:
+    - id: misa-soul
+      name: 'dsh-misa-soul'

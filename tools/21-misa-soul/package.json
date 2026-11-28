@@ -1,0 +1,36 @@
+{
+  "name": "dsh-misa-soul",
+  "version": "0.1.0",
+  "description": "人工灵魂：分层记忆树（根/枝/叶/果）+ 按人账本 + 情绪衰减。把一份纯文本记忆目录挂进每个会话，并提供读写工具。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "category": "extension",
+    "displayName": "Misa Soul",
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh-misa-soul",
+    "deepseek-harness",
+    "memory",
+    "soul",
+    "persona"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -317,6 +317,25 @@ dsh plugin --profile desktop add "link:<解压路径>"
 npm publish --access public
 ```
 
+## 配套插件源码（0.17.0 新增）
+
+本机在用的几个独立插件，源码收在 `tools/` 下，各自带 `package.json` / `cordis.patch.yml`，可以单独 link 安装，不跟着根插件一起加载：
+
+| 目录 | 包名 | 干什么 |
+| --- | --- | --- |
+| `tools/21-misa-soul/` | `dsh-misa-soul` | 人工灵魂本体：根页每轮注入、分层记忆树、按人账本、跨会话唤醒、接续推送、轨道 |
+| `tools/22-notify/` | `dsh-notify` | 主动推送：今日新闻、挂账检查、插件体检、微信通道 |
+| `tools/23-ctx-alert/` | `dsh-ctx-alert` | 真实上下文占用告警：tokenMeter + 会话文件，按压缩轮次提醒 |
+| `tools/24-alert-feed/` | `dsh-alert-feed` | 把已经推出去的告警每轮喂回模型，只读 `state/` |
+
+```bash
+# 比如只装推送和上下文告警
+dsh plugin --profile desktop add "link:<仓库>/tools/22-notify"
+dsh plugin --profile desktop add "link:<仓库>/tools/23-ctx-alert"
+```
+
+`dsh-tool-gate` 不在本仓库，见上面「工具分组、按需开放」一节。
+
 ## 插件契约（给想改的人）
 
 - `package.json` 里 `dsh.bundle.patch` 指向 `cordis.patch.yml`
@@ -344,7 +363,8 @@ dsh-soul-seed/
 │   ├── 05-history/ 历史      按月一句结论 + log.md 索引
 │   ├── 06-image/   出图      便宜的试构图（备胎，统一走 DSH 的 generate_image）
 │   ├── 07-sync/    同步      写锁 + 同步脚本（可选）
-│   └── 08-ops/     杂务      一键备份 / 状态发布（publish）
+│   ├── 08-ops/     杂务      一键备份 / 状态发布（publish）
+│   ├── 21-misa-soul/ 22-notify/ 23-ctx-alert/ 24-alert-feed/   配套插件源码（见下节）
 │
 ├── tests/                    一份测试跑完 29 项（临时 HOME，不碰真数据）
 ├── docs/                     初始化问答（23 问）· 生图经验

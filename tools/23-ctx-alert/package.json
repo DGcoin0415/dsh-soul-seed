@@ -1,0 +1,36 @@
+{
+  "name": "dsh-ctx-alert",
+  "version": "0.1.0",
+  "description": "真实上下文占用告警：读 tokenMeter / 会话文件的真实 token 百分比，数压缩轮次，倒数第二轮 70%、最后一轮 60% 才提醒一次。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "selftest.mjs"
+  ],
+  "dsh": {
+    "category": "extension",
+    "displayName": "Context Alert",
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh-ctx-alert",
+    "deepseek-harness",
+    "context",
+    "alert"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
